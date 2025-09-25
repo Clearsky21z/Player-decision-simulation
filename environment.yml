@@ -1,0 +1,11 @@
+name: soccer-sim
+channels:
+  - defaults
+dependencies:
+  - python=3.9
+  - matplotlib
+  - numpy
+  - pandas
+  - scipy
+  - jupyter
+  - scikit-learn
