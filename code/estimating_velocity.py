@@ -16,17 +16,28 @@ def calculate_euclidean_distance(loc1: List[float], loc2: List[float]) -> float:
     """
     Calculate Euclidean distance between two coordinate points.
 
+    Robustly handles cases where input locations might be missing (None or NaN),
+    returning 0.0 in those instances to prevent crashes.
+
     Args:
-        loc1: [x, y] start location
-        loc2: [x, y] end location
+        loc1 (list[float]): The [x, y] start location.
+        loc2 (list[float]): The [x, y] end location.
 
     Returns:
-        Distance in pitch units (yards/meters depending on data source)
+        float: Distance in pitch units (yards or meters depending on data source).
+               Returns 0.0 if either input is invalid or has fewer than 2 coordinates.
     """
+    # Check if inputs are None
     if loc1 is None or loc2 is None:
         return 0.0
 
-    # Ensure inputs are valid lists/arrays with at least 2 elements
+    # Safety check: Ensure inputs are actually lists/tuples/arrays
+    # This prevents "float has no len()" errors if a location is NaN
+    if not isinstance(loc1, (list, tuple, np.ndarray)) or \
+       not isinstance(loc2, (list, tuple, np.ndarray)):
+        return 0.0
+
+    # Ensure valid dimensions
     if len(loc1) < 2 or len(loc2) < 2:
         return 0.0
 
