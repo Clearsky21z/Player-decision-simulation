@@ -1,7 +1,11 @@
 # Player Decision Making Embedding for Similarity and Simulation
 
 ## Group Members
-- 
+- Jaehyeon Park
+- John Zhang
+- Ted Tao
+- Cris Gao
+- Eason Huang
 
 ## Introduction
 
