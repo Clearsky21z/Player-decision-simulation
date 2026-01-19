@@ -1,22 +1,3 @@
-"""
-channel_correlation_and_importance.py (FULL COPY-PASTE VERSION)
-
-What it does:
-- Load StatsBomb open-data (events + 360 freeze-frame) using your own loader: load_match_data (from load_data.py)
-- Build SoccerMap-like 13 channels on a 104x68 grid for many pass events
-- For each event, summarize each channel into 1 scalar -> (n_events, 13) feature table
-- Visualize:
-  (1) Channel-channel correlation heatmap  -> saved as PNG
-  (2) Channel "importance proxy" bar plot (|corr with pass_outcome|) -> saved as PNG
-- Save a CSV with the summary features
-
-Important:
-- NO notebook code is used.
-- This script may take time because each pass builds dense 104x68 fields.
-
-Run:
-  python channel_correlation_and_importance.py
-"""
 
 from __future__ import annotations
 
@@ -558,3 +539,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
