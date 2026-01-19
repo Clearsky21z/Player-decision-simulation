@@ -465,13 +465,13 @@ def build_event_table(
 
 
 def main():
-    # ---- Set your local StatsBomb open-data 'data' directory ----
+
     # Must contain: events/, three-sixty/, (lineups/ optional)
     base_dir = r"E:\R\open-data-master\data"
 
     # ---- Match IDs that exist locally and have 360 ----
     match_ids = [
-        "3788741",  # replace with your own match_id(s)
+        "3788741",
     ]
 
     # If it feels slow, reduce this to 50/100 first
@@ -535,6 +535,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
