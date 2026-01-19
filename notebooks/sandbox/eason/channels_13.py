@@ -1,16 +1,3 @@
-"""
-Reproduce the 13 input channels described in SoccerMap (Fernandez & Bornn, 2020)
-using StatsBomb open-data (events + 360 freeze-frames), and save a PNG image
-for each channel.
-
-Important notes:
-- The paper uses tracking data (10Hz). With StatsBomb open-data we cannot recover
-  full player trajectories. We estimate ONLY the actor (ball carrier) velocity
-  vector from consecutive events, and set other players' velocities to (0,0).
-- We apply a simple left-to-right normalization heuristic for each pass:
-  if end_x < start_x, we flip the entire frame horizontally (x -> 120-x, y -> 80-y).
-"""
-
 from __future__ import annotations
 
 import os
@@ -623,3 +610,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
