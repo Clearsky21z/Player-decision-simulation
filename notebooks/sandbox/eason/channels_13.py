@@ -206,8 +206,6 @@ def estimate_actor_velocity_vector(
 ) -> pd.DataFrame:
     """
     Estimate (vx, vy) for each player's events using displacement to next event.
-    This follows the same philosophy as your estimating_velocity.py, but keeps components.
-
     Output columns:
       - vx, vy  (metric units per second)
       - speed
@@ -610,4 +608,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
