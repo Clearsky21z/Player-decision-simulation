@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 def main():
-    # ---- Config (edit if needed)
+    # ---- Config
     base_dir = r"E:\R\open-data-master\data"
     match_id = "3788741"
 
@@ -13,7 +13,7 @@ def main():
     combined = channels_13.merge_freeze_frames(events, threesixty)
     df = channels_13.events_to_df(combined)
 
-    # ---- Estimate event-to-event velocity (actor only, per your pipeline)
+    # ---- Estimate event-to-event velocity 
     df_vel = channels_13.estimate_actor_velocity_vector(df, smooth_window=3)
 
     # ---- Basic diagnostics
@@ -82,3 +82,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
