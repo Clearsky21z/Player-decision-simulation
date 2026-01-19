@@ -8,14 +8,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# ---- Import YOUR loader (your own code) ----
-# Your load_match_data should return a single "combined" list where each event may include "freeze_frame".
+
 from load_data import load_match_data
 
 
-# =========================
-# Config
-# =========================
 PITCH_LENGTH = 120.0
 PITCH_WIDTH = 80.0
 
@@ -116,9 +112,9 @@ def angle_between(u: np.ndarray, v: np.ndarray, eps: float = 1e-9) -> Tuple[np.n
     return cos_t, sin_t
 
 
-# =========================
+
 # Parsing: combined events -> DataFrame (self-contained)
-# =========================
+
 def events_to_df(combined_events: List[Dict]) -> pd.DataFrame:
     """
     Build a light events DataFrame with fields needed for:
@@ -162,9 +158,9 @@ def events_to_df(combined_events: List[Dict]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-# =========================
+
 # Velocity estimation (actor-only)
-# =========================
+
 def total_seconds(minute: int, second: int) -> float:
     return float(minute) * 60.0 + float(second)
 
@@ -226,9 +222,9 @@ def estimate_actor_velocity_vector(
     return df
 
 
-# =========================
+
 # 13-channel construction
-# =========================
+
 def build_13_channels_for_pass(pass_row: pd.Series, actor_v: Tuple[float, float]) -> np.ndarray:
     """
     Build channels on 104x68 grid.
@@ -249,7 +245,7 @@ def build_13_channels_for_pass(pass_row: pd.Series, actor_v: Tuple[float, float]
     goal_x, goal_y = PITCH_LENGTH, PITCH_WIDTH / 2.0
 
     # Channels 1-6 (sparse): positions (+ velocities where available)
-    # We only estimate actor velocity; others remain 0 in velocity channels.
+    # Only estimate actor velocity; others remain 0 in velocity channels.
     for p in freeze_frame:
         loc = p.get("location")
         if not (isinstance(loc, (list, tuple)) and len(loc) >= 2):
@@ -318,9 +314,9 @@ def build_13_channels_for_pass(pass_row: pd.Series, actor_v: Tuple[float, float]
     return C
 
 
-# =========================
+
 # Feature extraction (per-event summary)
-# =========================
+
 def channel_summary_vector(channels: np.ndarray) -> np.ndarray:
     """
     Convert (H,W,13) -> 13 scalars for correlation/importance analysis.
@@ -358,9 +354,9 @@ def point_biserial_corr(x: np.ndarray, y01: np.ndarray) -> float:
     return float(np.corrcoef(x, y01)[0, 1])
 
 
-# =========================
-# Plot helpers (SAVE PNG, no blocking show)
-# =========================
+
+# Plot
+
 def plot_corr_heatmap(corr: np.ndarray, labels: List[str], title: str, save_path: str) -> None:
     plt.figure(figsize=(10, 8))
     plt.imshow(corr, origin="lower", aspect="equal")
@@ -396,9 +392,9 @@ def plot_importance_bar(scores: np.ndarray, labels: List[str], title: str, save_
     plt.close()
 
 
-# =========================
+
 # Main pipeline
-# =========================
+
 def build_event_table(
         base_dir: str,
         match_ids: List[str],
@@ -539,4 +535,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
