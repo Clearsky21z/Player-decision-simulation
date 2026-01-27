@@ -1,0 +1,3062 @@
+[
+  {
+    "match_id": 3890563,
+    "match_date": "2016-05-14",
+    "kick_off": "15:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 904,
+      "home_team_name": "Bayer Leverkusen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 189,
+      "away_team_name": "Ingolstadt",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 44,
+          "name": "Ralph Hasenh\u00fcttl",
+          "nickname": null,
+          "dob": "1967-08-09",
+          "country": {
+            "id": 15,
+            "name": "Austria"
+          }
+        }
+      ]
+    },
+    "home_score": 3,
+    "away_score": 2,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-08-05T09:38:01.494282",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 34,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 377,
+      "name": "BayArena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 227,
+      "name": "Guido Winkmann",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890550,
+    "match_date": "2016-05-07",
+    "kick_off": "15:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 185,
+      "home_team_name": "Borussia M\u00f6nchengladbach",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3650,
+          "name": "Andr\u00e9 Schubert",
+          "nickname": null,
+          "dob": "1971-07-24",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 904,
+      "away_team_name": "Bayer Leverkusen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 2,
+    "away_score": 1,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-08-03T18:40:07.803002",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 33,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 372,
+      "name": "Stadion im BORUSSIA-PARK",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 245,
+      "name": "Bastian Dankert",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890540,
+    "match_date": "2016-04-30",
+    "kick_off": "18:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 904,
+      "home_team_name": "Bayer Leverkusen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 173,
+      "away_team_name": "Hertha Berlin",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 51,
+          "name": "P\u00e1l D\u00e1rdai",
+          "nickname": null,
+          "dob": "1976-03-16",
+          "country": {
+            "id": 103,
+            "name": "Hungary"
+          }
+        }
+      ]
+    },
+    "home_score": 2,
+    "away_score": 1,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-24T07:41:44.627113",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 32,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 377,
+      "name": "BayArena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 229,
+      "name": "Tobias Stieler",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890534,
+    "match_date": "2016-04-23",
+    "kick_off": "18:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 181,
+      "home_team_name": "Schalke 04",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 58,
+          "name": "Andr\u00e9 Breitenreiter",
+          "nickname": null,
+          "dob": "1973-10-02",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 904,
+      "away_team_name": "Bayer Leverkusen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 2,
+    "away_score": 3,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-19T17:07:48.502966",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 31,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 370,
+      "name": "VELTINS-Arena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 716,
+      "name": "Wolfgang Stark",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890521,
+    "match_date": "2016-04-16",
+    "kick_off": "15:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 904,
+      "home_team_name": "Bayer Leverkusen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 184,
+      "away_team_name": "Eintracht Frankfurt",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 374,
+          "name": "Niko Kova\u010d",
+          "nickname": null,
+          "dob": "1971-10-15",
+          "country": {
+            "id": 56,
+            "name": "Croatia"
+          }
+        }
+      ]
+    },
+    "home_score": 3,
+    "away_score": 0,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-25T09:12:32.507875",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 30,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 377,
+      "name": "BayArena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 231,
+      "name": "Deniz Aytekin",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890519,
+    "match_date": "2016-04-10",
+    "kick_off": "17:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 186,
+      "home_team_name": "FC K\u00f6ln",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 43,
+          "name": "Peter St\u00f6ger",
+          "nickname": null,
+          "dob": "1966-04-11",
+          "country": {
+            "id": 15,
+            "name": "Austria"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 904,
+      "away_team_name": "Bayer Leverkusen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 0,
+    "away_score": 2,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-31T12:19:56.474040",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 29,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 363,
+      "name": "RheinEnergieStadion",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 230,
+      "name": "Manuel Gr\u00e4fe",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890502,
+    "match_date": "2016-04-01",
+    "kick_off": "20:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 904,
+      "home_team_name": "Bayer Leverkusen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 179,
+      "away_team_name": "Wolfsburg",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 411,
+          "name": "Dieter Hecking",
+          "nickname": null,
+          "dob": "1964-09-12",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 3,
+    "away_score": 0,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-08-03T13:07:07.427967",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 28,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 377,
+      "name": "BayArena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 186,
+      "name": "Felix Brych",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890500,
+    "match_date": "2016-03-20",
+    "kick_off": "16:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 174,
+      "home_team_name": "VfB Stuttgart",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 1003277,
+          "name": "J\u00fcrgen Kramny",
+          "nickname": null,
+          "dob": "1971-10-18",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 904,
+      "away_team_name": "Bayer Leverkusen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 0,
+    "away_score": 2,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-19T13:10:23.962185",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 27,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 369,
+      "name": "Mercedes-Benz-Arena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 225,
+      "name": "Daniel Siebert",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890492,
+    "match_date": "2016-03-13",
+    "kick_off": "16:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 904,
+      "home_team_name": "Bayer Leverkusen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 171,
+      "away_team_name": "Hamburger SV",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 446,
+          "name": "Bruno Labbadia",
+          "nickname": null,
+          "dob": "1966-02-08",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 1,
+    "away_score": 0,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-08-03T13:06:19.003897",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 26,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 377,
+      "name": "BayArena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 237,
+      "name": "Christian Dingert",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890477,
+    "match_date": "2016-03-05",
+    "kick_off": "16:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 172,
+      "home_team_name": "Augsburg",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 672,
+          "name": "Markus Weinzierl",
+          "nickname": null,
+          "dob": "1974-12-28",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 904,
+      "away_team_name": "Bayer Leverkusen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 3,
+    "away_score": 3,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-24T09:18:59.971988",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 25,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 366,
+      "name": "WWK Arena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 240,
+      "name": "Markus Schmidt",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890472,
+    "match_date": "2016-03-02",
+    "kick_off": "21:00:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 904,
+      "home_team_name": "Bayer Leverkusen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 176,
+      "away_team_name": "Werder Bremen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3055,
+          "name": "Viktor Skripnik",
+          "nickname": null,
+          "dob": "1969-11-19",
+          "country": {
+            "id": 238,
+            "name": "Ukraine"
+          }
+        }
+      ]
+    },
+    "home_score": 1,
+    "away_score": 4,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-18T12:42:28.657695",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 24,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 377,
+      "name": "BayArena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 236,
+      "name": "Marco Fritz",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890463,
+    "match_date": "2016-02-28",
+    "kick_off": "18:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 177,
+      "home_team_name": "FSV Mainz 05",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 186,
+          "name": "Martin Schmidt",
+          "nickname": null,
+          "dob": "1967-04-12",
+          "country": {
+            "id": 221,
+            "name": "Switzerland"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 904,
+      "away_team_name": "Bayer Leverkusen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 1002246,
+          "name": "Markus Kr\u00f6sche",
+          "nickname": null,
+          "dob": "1980-09-17",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 3,
+    "away_score": 1,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-19T14:27:12.181867",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 23,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 374,
+      "name": "Mewa Arena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 231,
+      "name": "Deniz Aytekin",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890456,
+    "match_date": "2016-02-21",
+    "kick_off": "16:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 904,
+      "home_team_name": "Bayer Leverkusen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 180,
+      "away_team_name": "Borussia Dortmund",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 279,
+          "name": "Thomas Tuchel",
+          "nickname": null,
+          "dob": "1973-08-29",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 0,
+    "away_score": 1,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-15T21:48:00.266005",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 22,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 377,
+      "name": "BayArena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 241,
+      "name": "Felix Zwayer",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890444,
+    "match_date": "2016-02-13",
+    "kick_off": "16:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 872,
+      "home_team_name": "Darmstadt 98",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 377,
+          "name": "Dirk Schuster",
+          "nickname": null,
+          "dob": "1967-12-29",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 904,
+      "away_team_name": "Bayer Leverkusen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 1,
+    "away_score": 2,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-15T16:09:34.211127",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 21,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 548,
+      "name": "Merck-Stadion am B\u00f6llenfalltor",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 1945,
+      "name": "Jochen Drees",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890431,
+    "match_date": "2016-02-06",
+    "kick_off": "19:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 904,
+      "home_team_name": "Bayer Leverkusen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 169,
+      "away_team_name": "Bayern Munich",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 36,
+          "name": "Josep Guardiola i Sala",
+          "nickname": "Pep Guardiola",
+          "dob": "1971-01-18",
+          "country": {
+            "id": 214,
+            "name": "Spain"
+          }
+        }
+      ]
+    },
+    "home_score": 0,
+    "away_score": 0,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-12T18:20:28.803251",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 20,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 377,
+      "name": "BayArena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 1008759,
+      "name": "Knut Kircher",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890427,
+    "match_date": "2016-01-30",
+    "kick_off": "16:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 904,
+      "home_team_name": "Bayer Leverkusen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 178,
+      "away_team_name": "Hannover 96",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 6065,
+          "name": "Thomas Schaaf",
+          "nickname": null,
+          "dob": "1961-04-30",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 3,
+    "away_score": 0,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-08-03T13:03:43.290703",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 19,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 377,
+      "name": "BayArena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 248,
+      "name": "Tobias Welz",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890415,
+    "match_date": "2016-01-23",
+    "kick_off": "16:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 175,
+      "home_team_name": "Hoffenheim",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 1797,
+          "name": "Huub Stevens",
+          "nickname": null,
+          "dob": "1953-11-29",
+          "country": {
+            "id": 160,
+            "name": "Netherlands"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 904,
+      "away_team_name": "Bayer Leverkusen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 1,
+    "away_score": 1,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-13T09:28:13.556051",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 18,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 4541,
+      "name": "PreZero Arena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 236,
+      "name": "Marco Fritz",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890409,
+    "match_date": "2015-12-19",
+    "kick_off": "16:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 189,
+      "home_team_name": "Ingolstadt",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 44,
+          "name": "Ralph Hasenh\u00fcttl",
+          "nickname": null,
+          "dob": "1967-08-09",
+          "country": {
+            "id": 15,
+            "name": "Austria"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 904,
+      "away_team_name": "Bayer Leverkusen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 0,
+    "away_score": 1,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-08-03T13:02:05.091113",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 17,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 551,
+      "name": "Audi-Sportpark",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 241,
+      "name": "Felix Zwayer",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890395,
+    "match_date": "2015-12-12",
+    "kick_off": "19:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 904,
+      "home_team_name": "Bayer Leverkusen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 185,
+      "away_team_name": "Borussia M\u00f6nchengladbach",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3650,
+          "name": "Andr\u00e9 Schubert",
+          "nickname": null,
+          "dob": "1971-07-24",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 5,
+    "away_score": 0,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-16T22:31:14.141541",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 16,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 377,
+      "name": "BayArena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 229,
+      "name": "Tobias Stieler",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890390,
+    "match_date": "2015-12-05",
+    "kick_off": "16:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 173,
+      "home_team_name": "Hertha Berlin",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 51,
+          "name": "P\u00e1l D\u00e1rdai",
+          "nickname": null,
+          "dob": "1976-03-16",
+          "country": {
+            "id": 103,
+            "name": "Hungary"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 904,
+      "away_team_name": "Bayer Leverkusen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 2,
+    "away_score": 1,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-18T05:53:50.179730",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 15,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 367,
+      "name": "Olympiastadion Berlin",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 244,
+      "name": "Robert Hartmann",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890382,
+    "match_date": "2015-11-29",
+    "kick_off": "18:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 904,
+      "home_team_name": "Bayer Leverkusen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 181,
+      "away_team_name": "Schalke 04",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 58,
+          "name": "Andr\u00e9 Breitenreiter",
+          "nickname": null,
+          "dob": "1973-10-02",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 1,
+    "away_score": 1,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-08-02T16:44:25.506339",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 14,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 377,
+      "name": "BayArena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 236,
+      "name": "Marco Fritz",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890370,
+    "match_date": "2015-11-21",
+    "kick_off": "16:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 184,
+      "home_team_name": "Eintracht Frankfurt",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 1003175,
+          "name": "Armin Veh",
+          "nickname": null,
+          "dob": "1961-02-01",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 904,
+      "away_team_name": "Bayer Leverkusen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 1,
+    "away_score": 3,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-12T16:19:17.709152",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 13,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 116458,
+      "name": "Deutsche Bank Park",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 231,
+      "name": "Deniz Aytekin",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890359,
+    "match_date": "2015-11-07",
+    "kick_off": "16:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 904,
+      "home_team_name": "Bayer Leverkusen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 186,
+      "away_team_name": "FC K\u00f6ln",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 43,
+          "name": "Peter St\u00f6ger",
+          "nickname": null,
+          "dob": "1966-04-11",
+          "country": {
+            "id": 15,
+            "name": "Austria"
+          }
+        }
+      ]
+    },
+    "home_score": 1,
+    "away_score": 2,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-24T09:22:28.106604",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 12,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 377,
+      "name": "BayArena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 241,
+      "name": "Felix Zwayer",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890350,
+    "match_date": "2015-10-31",
+    "kick_off": "19:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 179,
+      "home_team_name": "Wolfsburg",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 411,
+          "name": "Dieter Hecking",
+          "nickname": null,
+          "dob": "1964-09-12",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 904,
+      "away_team_name": "Bayer Leverkusen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 2,
+    "away_score": 1,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-13T10:49:32.788523",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 11,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 4849,
+      "name": "Volkswagen Arena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 230,
+      "name": "Manuel Gr\u00e4fe",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890346,
+    "match_date": "2015-10-24",
+    "kick_off": "15:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 904,
+      "home_team_name": "Bayer Leverkusen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 174,
+      "away_team_name": "VfB Stuttgart",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 287,
+          "name": "Alexander Zorniger",
+          "nickname": null,
+          "dob": "1967-10-08",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 4,
+    "away_score": 3,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-08-05T12:28:04.749075",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 10,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 377,
+      "name": "BayArena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 186,
+      "name": "Felix Brych",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890337,
+    "match_date": "2015-10-17",
+    "kick_off": "15:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 171,
+      "home_team_name": "Hamburger SV",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 446,
+          "name": "Bruno Labbadia",
+          "nickname": null,
+          "dob": "1966-02-08",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 904,
+      "away_team_name": "Bayer Leverkusen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 0,
+    "away_score": 0,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-12T11:48:17.290431",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 9,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 379,
+      "name": "Volksparkstadion",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 248,
+      "name": "Tobias Welz",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890330,
+    "match_date": "2015-10-04",
+    "kick_off": "17:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 904,
+      "home_team_name": "Bayer Leverkusen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 172,
+      "away_team_name": "Augsburg",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 672,
+          "name": "Markus Weinzierl",
+          "nickname": null,
+          "dob": "1974-12-28",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 1,
+    "away_score": 1,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-13T15:19:50.409962",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 8,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 377,
+      "name": "BayArena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 229,
+      "name": "Tobias Stieler",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890315,
+    "match_date": "2015-09-26",
+    "kick_off": "15:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 176,
+      "home_team_name": "Werder Bremen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3055,
+          "name": "Viktor Skripnik",
+          "nickname": null,
+          "dob": "1969-11-19",
+          "country": {
+            "id": 238,
+            "name": "Ukraine"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 904,
+      "away_team_name": "Bayer Leverkusen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 0,
+    "away_score": 3,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-13T15:53:44.303255",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 7,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 4729,
+      "name": "Wohninvest Weserstadion ",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 716,
+      "name": "Wolfgang Stark",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890312,
+    "match_date": "2015-09-23",
+    "kick_off": "20:00:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 904,
+      "home_team_name": "Bayer Leverkusen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 177,
+      "away_team_name": "FSV Mainz 05",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 186,
+          "name": "Martin Schmidt",
+          "nickname": null,
+          "dob": "1967-04-12",
+          "country": {
+            "id": 221,
+            "name": "Switzerland"
+          }
+        }
+      ]
+    },
+    "home_score": 1,
+    "away_score": 0,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-13T15:18:54.247729",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 6,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 377,
+      "name": "BayArena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 236,
+      "name": "Marco Fritz",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890301,
+    "match_date": "2015-09-20",
+    "kick_off": "17:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 180,
+      "home_team_name": "Borussia Dortmund",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 279,
+          "name": "Thomas Tuchel",
+          "nickname": null,
+          "dob": "1973-08-29",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 904,
+      "away_team_name": "Bayer Leverkusen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 3,
+    "away_score": 0,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-12T17:40:05.681076",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 5,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 373,
+      "name": "Signal-Iduna-Park",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 231,
+      "name": "Deniz Aytekin",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890288,
+    "match_date": "2015-09-12",
+    "kick_off": "15:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 904,
+      "home_team_name": "Bayer Leverkusen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 872,
+      "away_team_name": "Darmstadt 98",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 377,
+          "name": "Dirk Schuster",
+          "nickname": null,
+          "dob": "1967-12-29",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 0,
+    "away_score": 1,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-08-12T17:14:29.327004",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 4,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 377,
+      "name": "BayArena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 1008767,
+      "name": "Peter Sippel",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890278,
+    "match_date": "2015-08-29",
+    "kick_off": "18:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 169,
+      "home_team_name": "Bayern Munich",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 36,
+          "name": "Josep Guardiola i Sala",
+          "nickname": "Pep Guardiola",
+          "dob": "1971-01-18",
+          "country": {
+            "id": 214,
+            "name": "Spain"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 904,
+      "away_team_name": "Bayer Leverkusen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 3,
+    "away_score": 0,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-12T15:22:15.022676",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 3,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 4867,
+      "name": "Allianz Arena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 1008758,
+      "name": "Florian Meyer",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890273,
+    "match_date": "2015-08-22",
+    "kick_off": "15:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 178,
+      "home_team_name": "Hannover 96",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 1003174,
+          "name": "Michael Frontzeck",
+          "nickname": null,
+          "dob": "1964-03-26",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 904,
+      "away_team_name": "Bayer Leverkusen",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 0,
+    "away_score": 1,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-08-03T13:00:34.896241",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 2,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 378,
+      "name": "Heinz von Heiden-Arena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 716,
+      "name": "Wolfgang Stark",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  },
+  {
+    "match_id": 3890260,
+    "match_date": "2015-08-15",
+    "kick_off": "15:30:00.000",
+    "competition": {
+      "competition_id": 9,
+      "country_name": "Germany",
+      "competition_name": "1. Bundesliga"
+    },
+    "season": {
+      "season_id": 27,
+      "season_name": "2015/2016"
+    },
+    "home_team": {
+      "home_team_id": 904,
+      "home_team_name": "Bayer Leverkusen",
+      "home_team_gender": "male",
+      "home_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 3980,
+          "name": "Roger Schmidt",
+          "nickname": null,
+          "dob": "1967-03-13",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "away_team": {
+      "away_team_id": 175,
+      "away_team_name": "Hoffenheim",
+      "away_team_gender": "male",
+      "away_team_group": null,
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      },
+      "managers": [
+        {
+          "id": 59,
+          "name": "Markus Gisdol",
+          "nickname": null,
+          "dob": "1969-08-17",
+          "country": {
+            "id": 85,
+            "name": "Germany"
+          }
+        }
+      ]
+    },
+    "home_score": 2,
+    "away_score": 1,
+    "match_status": "available",
+    "match_status_360": "unscheduled",
+    "last_updated": "2023-07-11T19:49:42.336088",
+    "last_updated_360": null,
+    "metadata": {
+      "data_version": "1.1.0",
+      "shot_fidelity_version": "2",
+      "xy_fidelity_version": "2"
+    },
+    "match_week": 1,
+    "competition_stage": {
+      "id": 1,
+      "name": "Regular Season"
+    },
+    "stadium": {
+      "id": 377,
+      "name": "BayArena",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    },
+    "referee": {
+      "id": 244,
+      "name": "Robert Hartmann",
+      "country": {
+        "id": 85,
+        "name": "Germany"
+      }
+    }
+  }
+]
