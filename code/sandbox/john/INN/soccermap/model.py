@@ -14,7 +14,7 @@ class SoccerMapConfig:
     Matches the paper's described components.
 
     """
-    in_channels: int = 13
+    in_channels: int = 14
 
     feat_channels: int = 32
 
@@ -199,6 +199,10 @@ def pass_selection_loss(logits: torch.Tensor, dest_index: torch.Tensor) -> torch
     flat = logits.view(N, -1)
     return F.cross_entropy(flat, dest_index)
 
+# TODO
+# we need to create a new loss function for pass selection model
+# 1. We have to make the true pass a guassian field N(0,2)
+# 2. then our loss function will be minimizing KL divergence between the predicted distribution and the true distribution
 
 @torch.no_grad()
 def pass_success_surface(logits: torch.Tensor) -> torch.Tensor:

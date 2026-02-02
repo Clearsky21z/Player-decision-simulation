@@ -4,6 +4,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+from matplotlib.path import Path as MplPath
 
 from .config import GridSpec
 
@@ -106,15 +107,16 @@ def compute_player_velocities(
     return vel
 
 
-def create_13_channels(
+def create_14_channels(
     expanded_df: pd.DataFrame,
     event_id: str,
     grid: GridSpec = GridSpec(),
     *,
     velocity_dict: Optional[Dict[VelKey, Tuple[float, float]]] = None,
+    visible_area: Optional[List[float]] = None,
 ) -> Optional[np.ndarray]:
     """
-    Create a (13, L, W) channel tensor for a single event.
+    Create a (14, L, W) channel tensor for a single event.
 
     Channels (matches notebook intent):
       1-2  : teammate / opponent locations (sparse counts)
@@ -125,6 +127,7 @@ def create_13_channels(
       9-10 : sin/cos angle between (cell->goal) and (cell->ball) (dense)
       11   : angle to goal in radians (dense)
       12-13: sin/cos angle between ball velocity dir and (ball->teammate) (sparse at teammate cells)
+      14   : visibility mask (dense)
 
     Returns None if event not found or has no actor row.
     """
@@ -156,7 +159,7 @@ def create_13_channels(
 
     goal_l, goal_w = grid.goal_location()
 
-    chans = np.zeros((13, grid.L, grid.W), dtype=np.float32)
+    chans = np.zeros((14, grid.L, grid.W), dtype=np.float32)
 
     # ----- sparse channels: player locations + velocities -----
     players = ev[ev["actor"] == False].copy()
@@ -241,6 +244,9 @@ def create_13_channels(
     # 11: angle to goal in radians
     chans[10] = np.arctan2((goal_w - gy), (goal_l - gx)).astype(np.float32)
 
+    # 14: visibility mask
+    chans[13] = create_channel_visibility_mask(visible_area, grid)
+
     return chans
 
 
@@ -280,13 +286,55 @@ def create_channels_for_events(
                 expanded_df, eid, previous_event_id=prev_id,
                 max_time_gap=max_time_gap, max_match_distance=max_match_distance
             )
-        chans = create_13_channels(expanded_df, eid, grid, velocity_dict=vel)
+        chans = create_14_channels(expanded_df, eid, grid, velocity_dict=vel)
         if chans is not None:
             out.append(chans)
             valid.append(eid)
             prev_id = eid
 
     if len(out) == 0:
-        return np.zeros((0, 13, grid.L, grid.W), dtype=np.float32), []
+        return np.zeros((0, 14, grid.L, grid.W), dtype=np.float32), []
 
     return np.stack(out, axis=0), valid
+
+# TODO: potential channel 1/2 update:
+# instead of sparse counts, we can do Gaussian kernels centered at player locations?
+
+
+
+def create_channel_visibility_mask(
+    visible_area: Optional[List[float]],
+    grid: GridSpec = GridSpec(),
+) -> np.ndarray:
+    """
+    Channel 14: Visibility mask (dense).
+    1 = visible, 0 = not visible.
+    
+    Args:
+        visible_area: Flat list [x1, y1, x2, y2, ...] defining visible polygon
+        grid: GridSpec defining the grid dimensions
+    
+    Returns:
+        np.array of shape (grid.L, grid.W)
+    """
+    # If no valid visible area, assume entire pitch is visible
+    if visible_area is None or len(visible_area) < 6 or len(visible_area) % 2 != 0:
+        return np.ones((grid.L, grid.W), dtype=np.float32)    
+    # Convert flat array to polygon points
+    polygon_points = [
+        (visible_area[i], visible_area[i+1]) 
+        for i in range(0, len(visible_area), 2)
+    ]
+    
+    # Create matplotlib Path
+    polygon_path = MplPath(polygon_points)
+    
+    # Create grid of all points (vectorized)
+    x_coords, y_coords = np.meshgrid(np.arange(grid.L), np.arange(grid.W))
+    points = np.vstack([x_coords.ravel(), y_coords.ravel()]).T
+    
+    # Test all points
+    inside = polygon_path.contains_points(points)
+    channel = inside.reshape(grid.W, grid.L).T.astype(np.float32)
+    
+    return channel

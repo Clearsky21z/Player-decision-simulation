@@ -8,14 +8,14 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
-from .channels import create_13_channels, compute_player_velocities
+from .channels import create_14_channels, compute_player_velocities
 from .config import GridSpec
 
 
 @dataclass(frozen=True)
 class PassSample:
     event_id: str
-    channels: torch.Tensor         # (13,L,W)
+    channels: torch.Tensor         # (14,L,W)
     dest_index: int                # for selection model (flattened index)
     completed: Optional[int]       # 0/1 for success model
     dest_lw: Tuple[int, int]       # (l_idx,w_idx)
@@ -70,10 +70,10 @@ class PassDataset(Dataset):
                 max_match_distance=self.max_match_distance,
             )
 
-        chans = create_13_channels(self.expanded_df, eid, self.grid, velocity_dict=vel)
+        chans = create_14_channels(self.expanded_df, eid, self.grid, velocity_dict=vel)
         if chans is None:
             # fallback: return a zero sample (rare), but keep deterministic
-            chans = np.zeros((13, self.grid.L, self.grid.W), dtype=np.float32)
+            chans = np.zeros((14, self.grid.L, self.grid.W), dtype=np.float32)
 
         # destination index
         end_loc = row["end_location"]
