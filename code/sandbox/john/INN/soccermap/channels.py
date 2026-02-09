@@ -84,6 +84,75 @@ def _place_sparse_counts(
         chans[ch_loc, l_idx, w_idx] += 1.0
 
 
+def _add_gaussian_blob(
+    channel: np.ndarray,          # (L, W)
+    l0: float,
+    w0: float,
+    *,
+    sigma_l: float = 1.5,
+    sigma_w: float = 1.5,
+    truncate: float = 3.0,
+    amplitude: float = 1.0,
+    mode: str = "add",            # "add" or "max"
+) -> None:
+    L, W = channel.shape
+    r_l = int(np.ceil(truncate * sigma_l))
+    r_w = int(np.ceil(truncate * sigma_w))
+
+    l_min = max(0, int(np.floor(l0)) - r_l)
+    l_max = min(L - 1, int(np.floor(l0)) + r_l)
+    w_min = max(0, int(np.floor(w0)) - r_w)
+    w_max = min(W - 1, int(np.floor(w0)) + r_w)
+    if l_min > l_max or w_min > w_max:
+        return
+
+    ls = np.arange(l_min, l_max + 1, dtype=np.float32)
+    ws = np.arange(w_min, w_max + 1, dtype=np.float32)
+    LL, WW = np.meshgrid(ls, ws, indexing="ij")
+
+    dl2 = (LL - float(l0)) ** 2
+    dw2 = (WW - float(w0)) ** 2
+
+    g = np.exp(-0.5 * (dl2 / (sigma_l ** 2) + dw2 / (sigma_w ** 2))).astype(np.float32)
+    g *= float(amplitude)
+
+    patch = channel[l_min:l_max + 1, w_min:w_max + 1]
+    if mode == "max":
+        np.maximum(patch, g, out=patch)
+    else:
+        patch += g
+
+
+def _place_gaussian_locations(
+    chans: np.ndarray,
+    df: pd.DataFrame,
+    grid: GridSpec,
+    ch_loc: int,
+    *,
+    sigma_l: float = 1.5,
+    sigma_w: float = 1.5,
+    truncate: float = 3.0,
+    amplitude: float = 1.0,
+    mode: str = "add",
+) -> None:
+    for _, row in df.iterrows():
+        loc = row.get("ff_location")
+        xy = _safe_loc_xy(loc)
+        if xy is None:
+            continue
+        # continuous grid-space center (l0, w0)
+        _, _, l0, w0 = _sb_to_grid_point(grid, xy[0], xy[1])
+        _add_gaussian_blob(
+            chans[ch_loc],
+            float(l0), float(w0),
+            sigma_l=sigma_l,
+            sigma_w=sigma_w,
+            truncate=truncate,
+            amplitude=amplitude,
+            mode=mode,
+        )
+
+
 def _place_sparse_velocities(
         chans: np.ndarray,
         df: pd.DataFrame,
@@ -342,8 +411,12 @@ def create_14_channels(
         opps = players.loc[players["teammate"] == False]
 
         # locations
-        _place_sparse_counts(chans, mates, grid, ch_loc=0)
-        _place_sparse_counts(chans, opps, grid, ch_loc=1)
+        #_place_sparse_counts(chans, mates, grid, ch_loc=0)
+        #_place_sparse_counts(chans, opps, grid, ch_loc=1)
+
+        # locations (Gaussian instead of sparse counts)
+        _place_gaussian_locations(chans, mates, grid, ch_loc=0, sigma_l=1.5, sigma_w=1.5, truncate=3.0, mode="add")
+        _place_gaussian_locations(chans, opps, grid, ch_loc=1, sigma_l=1.5, sigma_w=1.5, truncate=3.0, mode="add")
 
         # velocities (optional)
         _place_sparse_velocities(chans, mates, grid, ch_vx=2, ch_vy=3, velocity_dict=velocity_dict)
@@ -490,3 +563,23 @@ def create_channel_visibility_mask(
     channel = inside.reshape(grid.W, grid.L).T.astype(np.float32)
 
     return channel
+
+
+def create_channel_visibility_mask(
+    visible_area: Optional[List[float]],
+    grid: GridSpec = GridSpec(),
+) -> np.ndarray:
+    if visible_area is None or len(visible_area) < 6 or (len(visible_area) % 2) != 0:
+        return np.ones((grid.L, grid.W), dtype=np.float32)
+
+    polygon_points = [(visible_area[i], visible_area[i + 1]) for i in range(0, len(visible_area), 2)]
+    polygon_path = MplPath(polygon_points)
+
+    # grid mesh in grid-space (continuous), then convert to SB-space
+    gx, gy = grid.grid_mesh()                 # (L,W)
+    x_sb, y_sb = _grid_to_sb_xy(grid, gx, gy) # (L,W) in SB coords
+
+    points = np.vstack([x_sb.ravel(), y_sb.ravel()]).T
+    inside = polygon_path.contains_points(points)
+
+    return inside.reshape(grid.L, grid.W).astype(np.float32)
