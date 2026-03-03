@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader, ConcatDataset
 from soccermap.statsbomb_io import load_events, load_threesixty, load_lineups
 from soccermap.expand import build_expanded_dfs
 from soccermap.dataset import PassDataset
-from soccermap.model import SoccerMap, SoccerMapConfig, pass_selection_loss
+from soccermap.model import SoccerMap, SoccerMapConfig, pass_selection_kl_loss
 
 
 def list_available_match_ids(data_root: str) -> List[str]:
@@ -119,7 +119,7 @@ def main():
             dest = torch.tensor([b.dest_index for b in batch], dtype=torch.long, device=args.device)
 
             logits = model(channels)
-            loss = pass_selection_loss(logits, dest)
+            loss = pass_selection_kl_loss(logits, dest)
 
             opt.zero_grad()
             loss.backward()

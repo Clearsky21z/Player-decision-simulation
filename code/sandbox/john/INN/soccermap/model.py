@@ -199,6 +199,38 @@ def pass_selection_loss(logits: torch.Tensor, dest_index: torch.Tensor) -> torch
     flat = logits.view(N, -1)
     return F.cross_entropy(flat, dest_index)
 
+
+def pass_selection_kl_loss(logits: torch.Tensor, dest_index: torch.Tensor, sigma: float = 2.0) -> torch.Tensor:
+    """
+    KL-divergence pass-selection loss.
+
+    Target: 2-D Gaussian centred on the true destination cell with std=sigma,
+            normalised to a valid probability distribution over the H*W grid.
+    Predicted: log-softmax of the model's flattened spatial logits.
+    """
+    N, _, H, W = logits.shape
+    flat_logits = logits.view(N, H * W)
+    log_p = F.log_softmax(flat_logits, dim=1)
+
+    # build Gaussian target for each sample
+    coords_l = torch.arange(H, device=logits.device).float()
+    coords_w = torch.arange(W, device=logits.device).float()
+    grid_l, grid_w = torch.meshgrid(coords_l, coords_w, indexing="ij")  # (H,W)
+
+    dest_l = (dest_index // W).float() # (N,)
+    dest_w = (dest_index %  W).float() # (N,)
+
+    sigma = 2.0
+    diff_l = grid_l.unsqueeze(0) - dest_l.view(N, 1, 1) # (N,H,W)
+    diff_w = grid_w.unsqueeze(0) - dest_w.view(N, 1, 1)
+    gauss  = torch.exp(-(diff_l**2 + diff_w**2) / (2 * sigma**2))
+    q = gauss.view(N, H * W)
+    q = q / q.sum(dim=1, keepdim=True) # normalize to valid dist
+
+    return F.kl_div(log_p, q, reduction="batchmean")
+
+
+
 # TODO
 # we need to create a new loss function for pass selection model
 # 1. We have to make the true pass a guassian field N(0,2)
