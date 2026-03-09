@@ -565,6 +565,8 @@ def create_channel_visibility_mask(
     return channel
 
 
+# Convert grid coordinates to StatsBomb coordinates before performing the polygon check.
+# This ensures both the grid points and the visible_area polygon are in the same coordinate system.
 def create_channel_visibility_mask(
     visible_area: Optional[List[float]],
     grid: GridSpec = GridSpec(),
