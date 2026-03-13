@@ -769,21 +769,21 @@ def create_14_channels_new(
 
 # Convert grid coordinates to StatsBomb coordinates before performing the polygon check.
 # This ensures both the grid points and the visible_area polygon are in the same coordinate system.
-def create_channel_visibility_mask(
-    visible_area: Optional[List[float]],
-    grid: GridSpec = GridSpec(),
-) -> np.ndarray:
-    if visible_area is None or len(visible_area) < 6 or (len(visible_area) % 2) != 0:
-        return np.ones((grid.L, grid.W), dtype=np.float32)
+# def create_channel_visibility_mask(
+#     visible_area: Optional[List[float]],
+#     grid: GridSpec = GridSpec(),
+# ) -> np.ndarray:
+#     if visible_area is None or len(visible_area) < 6 or (len(visible_area) % 2) != 0:
+#         return np.ones((grid.L, grid.W), dtype=np.float32)
 
-    polygon_points = [(visible_area[i], visible_area[i + 1]) for i in range(0, len(visible_area), 2)]
-    polygon_path = MplPath(polygon_points)
+#     polygon_points = [(visible_area[i], visible_area[i + 1]) for i in range(0, len(visible_area), 2)]
+#     polygon_path = MplPath(polygon_points)
 
-    # grid mesh in grid-space (continuous), then convert to SB-space
-    gx, gy = grid.grid_mesh()                 # (L,W)
-    x_sb, y_sb = _grid_to_sb_xy(grid, gx, gy) # (L,W) in SB coords
+#     # grid mesh in grid-space (continuous), then convert to SB-space
+#     gx, gy = grid.grid_mesh()                 # (L,W)
+#     x_sb, y_sb = _grid_to_sb_xy(grid, gx, gy) # (L,W) in SB coords
 
-    points = np.vstack([x_sb.ravel(), y_sb.ravel()]).T
-    inside = polygon_path.contains_points(points)
+#     points = np.vstack([x_sb.ravel(), y_sb.ravel()]).T
+#     inside = polygon_path.contains_points(points)
 
-    return inside.reshape(grid.L, grid.W).astype(np.float32)
+#     return inside.reshape(grid.L, grid.W).astype(np.float32)
