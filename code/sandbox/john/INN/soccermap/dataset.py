@@ -19,6 +19,7 @@ class PassSample:
     dest_index: int                # for selection model (flattened index)
     completed: Optional[int]       # 0/1 for success model
     dest_lw: Tuple[int, int]       # (l_idx,w_idx)
+    actor_player_name: Optional[str] = None  # for player embedding lookup
 
 
 class PassDataset(Dataset):
@@ -35,6 +36,7 @@ class PassDataset(Dataset):
         *,
         grid: GridSpec = GridSpec(),
         only_passes: bool = True,
+        team_filter: Optional[str] = None,
         compute_velocities: bool = False,
         max_time_gap: float = 5.0,
         max_match_distance: float = 15.0,
@@ -49,6 +51,8 @@ class PassDataset(Dataset):
         actor = expanded_df[expanded_df["actor"] == True].copy()
         if only_passes:
             actor = actor[actor["event_type"] == "Pass"]
+        if team_filter:
+            actor = actor[actor["team"] == team_filter]
         # must have end_location
         actor = actor[actor["end_location"].notna()]
         self.actor_events = actor.sort_values("total_seconds").reset_index(drop=True)
@@ -83,10 +87,13 @@ class PassDataset(Dataset):
         completed = row.get("pass_completed")
         completed = None if pd.isna(completed) else int(completed)
 
+        actor_name = row.get("player_name") if "player_name" in row.index else None
+
         return PassSample(
             event_id=eid,
             channels=torch.tensor(chans, dtype=torch.float32),
             dest_index=dest_index,
             completed=completed,
             dest_lw=(int(l_idx), int(w_idx)),
+            actor_player_name=actor_name,
         )

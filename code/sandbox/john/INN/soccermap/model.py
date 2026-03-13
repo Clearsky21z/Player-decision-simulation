@@ -171,6 +171,92 @@ class SoccerMap(nn.Module):
         return p123  # logits
 
 
+
+class SoccerMapWithPlayerEmbed(nn.Module):
+    """
+    SoccerMap with a learnable player embedding injected at the end.
+    """
+
+    def __init__(
+        self,
+        num_players: int,
+        embed_dim: int = 8,
+        cfg: SoccerMapConfig = SoccerMapConfig(),
+    ):
+        super().__init__()
+        self.cfg = cfg
+        self.embed_dim = embed_dim
+
+        # Player embedding table (index 0 = unknown / padding)
+        self.player_embedding = nn.Embedding(
+            num_embeddings=num_players + 1,
+            embedding_dim=embed_dim,
+            padding_idx=0,
+        )
+
+        # --- Backbone (identical to SoccerMap) ---
+        self.feat1 = Conv5x5FeatBlock(cfg.in_channels, cfg.feat_channels, cfg.pad_mode)
+        self.pool1 = nn.MaxPool2d(2)
+
+        self.feat2 = Conv5x5FeatBlock(cfg.feat_channels, cfg.feat_channels, cfg.pad_mode)
+        self.pool2 = nn.MaxPool2d(2)
+
+        self.feat3 = Conv5x5FeatBlock(cfg.feat_channels, cfg.feat_channels, cfg.pad_mode)
+
+        self.pred1 = PredictionHead(cfg.feat_channels, cfg.pred_channels)
+        self.pred2 = PredictionHead(cfg.feat_channels, cfg.pred_channels)
+        self.pred3 = PredictionHead(cfg.feat_channels, cfg.pred_channels)
+
+        self.up3_to_2 = Upsample2xBlock(cfg.up_channels, cfg.pad_mode)
+        self.fuse23 = FusePair()
+
+        self.up23_to_1 = Upsample2xBlock(cfg.up_channels, cfg.pad_mode)
+        self.fuse123 = FusePair()
+
+        # --- Embedding projection head (for end injection) ---
+        self.embed_head = nn.Conv2d(1 + embed_dim, 1, kernel_size=1)
+
+    def forward(self, x: torch.Tensor, actor_ids: torch.Tensor) -> torch.Tensor:
+        """
+        Parameters
+        ----------
+        x : (N, 14, H, W) channel tensor
+        actor_ids : (N,) long tensor of player embedding indices
+
+        Returns
+        -------
+        logits : (N, 1, H, W)
+        """
+        N, C, H, W = x.shape
+
+        # --- Backbone (player-agnostic) ---
+        h1 = self.feat1(x)
+        p1 = self.pred1(h1)
+
+        h2 = self.feat2(self.pool1(h1))
+        p2 = self.pred2(h2)
+
+        h3 = self.feat3(self.pool2(h2))
+        p3 = self.pred3(h3)
+
+        p3_up = self.up3_to_2(p3)
+        p23 = self.fuse23(p2, p3_up)
+
+        p23_up = self.up23_to_1(p23)
+        p123 = self.fuse123(p1, p23_up)  # (N, 1, H, W)
+
+        # --- PLAYER EMBEDDING INJECTION ---
+        # To move the injection point, relocate this block.
+        # Currently: inject at the END (after CNN, before output).
+        embed = self.player_embedding(actor_ids)               # (N, D)
+        embed_spatial = embed[:, :, None, None].expand(N, self.embed_dim, H, W)  # (N, D, H, W)
+        fused = torch.cat([p123, embed_spatial], dim=1)        # (N, 1+D, H, W)
+        logits = self.embed_head(fused)                        # (N, 1, H, W)
+        # --- END PLAYER EMBEDDING INJECTION ---
+
+        return logits
+
+
 # -------- Losses / surfaces --------
 
 def _gather_dest_logits(logits: torch.Tensor, dest_index: torch.Tensor) -> torch.Tensor:
@@ -246,3 +332,5 @@ def pass_selection_surface(logits: torch.Tensor) -> torch.Tensor:
     N, _, H, W = logits.shape
     flat = logits.view(N, -1)
     return torch.softmax(flat, dim=1).view(N, H, W)  # sums to 1
+
+

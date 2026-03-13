@@ -5,12 +5,12 @@ from pathlib import Path
 from typing import List
 
 import torch
-from torch.utils.data import DataLoader, ConcatDataset
+from torch.utils.data import DataLoader, ConcatDataset, random_split
 
 from soccermap.statsbomb_io import load_events, load_threesixty, load_lineups
-from soccermap.expand import build_expanded_dfs
+from soccermap.expand import build_expanded_dfs, build_player_id_mapping
 from soccermap.dataset import PassDataset
-from soccermap.model import SoccerMap, SoccerMapConfig, pass_selection_kl_loss
+from soccermap.model import SoccerMapWithPlayerEmbed, SoccerMapConfig, pass_selection_kl_loss
 
 
 def list_available_match_ids(data_root: str) -> List[str]:
@@ -53,6 +53,8 @@ def main():
     ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--device", type=str, default="cpu")
     ap.add_argument("--compute_velocities", action="store_true")
+    ap.add_argument("--val_split", type=float, default=0.15)
+    ap.add_argument("--embed_team", type=str, default="Bayer Leverkusen")
     ap.add_argument("--out_ckpt", type=str, default="checkpoints/pass_selection.pt")
     args = ap.parse_args()
 
@@ -75,6 +77,15 @@ def main():
     if holdout:
         print(f"Holding out match_id={holdout} (NOT used in training)")
 
+    # --- collect lineups and build player ID mapping ---
+    all_lineups = []
+    for mid in train_ids:
+        all_lineups.append(load_lineups(args.data_root, mid))
+
+    player_id_mapping = build_player_id_mapping(all_lineups, team_name=args.embed_team)
+    num_players = len(player_id_mapping)
+    print(f"Player ID mapping: {num_players} unique players (team={args.embed_team})")
+
     # --- build datasets per match and concat ---
     ds_list = []
     total_passes = 0
@@ -89,46 +100,79 @@ def main():
             m.expanded_df,
             compute_velocities=args.compute_velocities,
             only_passes=True,
+            team_filter=args.embed_team,
         )
 
         ds_list.append(ds_mid)
         total_passes += len(ds_mid)
         print(f"  match {mid}: {len(ds_mid)} pass samples")
 
-    ds = ConcatDataset(ds_list)
-    print(f"Total training samples: {len(ds)} (sum={total_passes})")
+    full_ds = ConcatDataset(ds_list)
+    print(f"Total samples: {len(full_ds)} (sum={total_passes})")
 
-    dl = DataLoader(
-        ds,
-        batch_size=args.batch_size,
-        shuffle=True,
-        num_workers=0,
-        collate_fn=lambda batch: batch,  # PassDataset returns dataclasses
-    )
+    # --- train / val split ---
+    n_total = len(full_ds)
+    n_val = max(1, int(n_total * args.val_split))
+    n_train = n_total - n_val
+    train_ds, val_ds = random_split(full_ds, [n_train, n_val])
+    print(f"Train: {n_train}  Val: {n_val}")
 
-    model = SoccerMap(SoccerMapConfig()).to(args.device)
+    collate = lambda batch: batch  # PassDataset returns dataclasses
+    train_dl = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=0, collate_fn=collate)
+    val_dl = DataLoader(val_ds, batch_size=args.batch_size, shuffle=False, num_workers=0, collate_fn=collate)
+
+    model = SoccerMapWithPlayerEmbed(
+        num_players=num_players,
+        embed_dim=8,
+        cfg=SoccerMapConfig(),
+    ).to(args.device)
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
 
-    model.train()
     for ep in range(args.epochs):
-        total = 0.0
-        n = 0
-        for batch in dl:
-            # batch is list[PassSample]
+        # --- training ---
+        model.train()
+        train_total = 0.0
+        train_n = 0
+        for batch in train_dl:
             channels = torch.stack([b.channels for b in batch]).to(args.device)
             dest = torch.tensor([b.dest_index for b in batch], dtype=torch.long, device=args.device)
+            actor_ids = torch.tensor(
+                [player_id_mapping.get(b.actor_player_name, 0) for b in batch],
+                dtype=torch.long, device=args.device,
+            )
 
-            logits = model(channels)
+            logits = model(channels, actor_ids)
             loss = pass_selection_kl_loss(logits, dest)
 
             opt.zero_grad()
             loss.backward()
             opt.step()
 
-            total += float(loss.item()) * len(channels)
-            n += len(channels)
+            train_total += float(loss.item()) * len(channels)
+            train_n += len(channels)
 
-        print(f"epoch {ep+1}/{args.epochs}  loss={total/max(n,1):.4f}")
+        # --- validation ---
+        model.eval()
+        val_total = 0.0
+        val_n = 0
+        with torch.no_grad():
+            for batch in val_dl:
+                channels = torch.stack([b.channels for b in batch]).to(args.device)
+                dest = torch.tensor([b.dest_index for b in batch], dtype=torch.long, device=args.device)
+                actor_ids = torch.tensor(
+                    [player_id_mapping.get(b.actor_player_name, 0) for b in batch],
+                    dtype=torch.long, device=args.device,
+                )
+
+                logits = model(channels, actor_ids)
+                loss = pass_selection_kl_loss(logits, dest)
+
+                val_total += float(loss.item()) * len(channels)
+                val_n += len(channels)
+
+        train_loss = train_total / max(train_n, 1)
+        val_loss = val_total / max(val_n, 1)
+        print(f"epoch {ep+1}/{args.epochs}  train_loss={train_loss:.4f}  val_loss={val_loss:.4f}")
 
     # Save checkpoint for visualization / later evaluation
     out_path = Path(args.out_ckpt)
@@ -139,6 +183,9 @@ def main():
             "train_match_ids": train_ids,
             "holdout_match_id": holdout,
             "config": SoccerMapConfig().__dict__,
+            "player_id_mapping": player_id_mapping,
+            "num_players": num_players,
+            "embed_dim": 8,
         },
         out_path,
     )

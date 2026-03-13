@@ -87,6 +87,10 @@ def build_expanded_dfs(
         if team1 and team2 and team:
             opp_team = team2 if team == team1 else (team1 if team == team2 else None)
 
+        # Actor identity
+        player_info = ev.get("player") or {}
+        player_name = player_info.get("name")
+
         minute = ev.get("minute")
         second = ev.get("second")
         period = ev.get("period")
@@ -108,6 +112,7 @@ def build_expanded_dfs(
             "end_location": end_loc,
             "pass_completed": completed,
             "visible_area": (ff or {}).get("visible_area"),
+            "player_name": player_name,
         })
 
         # Actor row (unique)
@@ -128,6 +133,7 @@ def build_expanded_dfs(
             "ff_location": None,
             "ff_idx": None,
             "visible_area": (ff or {}).get("visible_area"),
+            "player_name": player_name,
         })
 
         if ff is None:
@@ -165,6 +171,7 @@ def build_expanded_dfs(
                 "ff_location": ploc[:2],
                 "ff_idx": ff_idx,
                 "visible_area": ff.get("visible_area"),
+                "player_name": None,
             })
             ff_idx += 1
 
@@ -176,3 +183,34 @@ def build_expanded_dfs(
         expanded_df["total_seconds"] = expanded_df["minute"].fillna(0).astype(float) * 60.0 + expanded_df["second"].fillna(0).astype(float)
 
     return ExpandedMatch(event_df=event_df, expanded_df=expanded_df)
+
+
+def build_player_id_mapping(
+    lineups_list: List[List[Dict[str, Any]]],
+    team_name: Optional[str] = None,
+) -> Dict[str, int]:
+    """
+    Build a global player_name -> 1-based index mapping from StatsBomb lineups.
+
+    Parameters
+    ----------
+    lineups_list : list of lineups, one per match.
+        Each lineups is the output of load_lineups(): a list with one dict
+        per team, each containing {"team_name": ..., "lineup": [{"player_name": ...}, ...]}.
+    team_name : if provided, only include players from this team.
+        Players from other teams will map to 0 (unknown/padding).
+
+    Returns
+    -------
+    Dict mapping player name to a 1-based integer index (0 is reserved for unknown).
+    """
+    names: set[str] = set()
+    for lineups in lineups_list:
+        for team in lineups:
+            if team_name and team.get("team_name") != team_name:
+                continue
+            for player in team.get("lineup", []):
+                name = player.get("player_name")
+                if name:
+                    names.add(name)
+    return {name: i + 1 for i, name in enumerate(sorted(names))}
