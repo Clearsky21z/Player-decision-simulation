@@ -89,6 +89,7 @@ def plot_pass_selection_embed(
     player_id_mapping: Dict[str, int],
     *,
     sample_idx: Optional[int] = None,
+    swap_player: Optional[str] = None,
     out_path: Optional[str] = None,
     show: bool = True,
     white_threshold: float = 1e-9,
@@ -107,6 +108,8 @@ def plot_pass_selection_embed(
     expanded_df : pd.DataFrame from build_expanded_dfs
     player_id_mapping : dict mapping player name -> embedding id
     sample_idx : index into ds; random if None
+    swap_player : if None, use the actual passer; if a player name string,
+        use that player's embedding instead (same situation, different player)
     out_path : if provided, save figure to this path
     show : call plt.show() if True
     white_threshold : probability below this renders as white
@@ -119,7 +122,13 @@ def plot_pass_selection_embed(
     sample = ds[sample_idx]
 
     actor_name = sample.actor_player_name
-    actor_id = player_id_mapping.get(actor_name, 0)
+
+    if swap_player is not None:
+        display_name = swap_player
+        actor_id = player_id_mapping.get(swap_player, 0)
+    else:
+        display_name = actor_name
+        actor_id = player_id_mapping.get(actor_name, 0)
 
     # ---- Forward pass ----
     with torch.no_grad():
@@ -194,40 +203,76 @@ def plot_pass_selection_embed(
 
     # passer + pass arrow + destination
     if passer_xy:
+        passer_label = "Ball carrier position" if swap_player else f"Passer: {actor_name}"
         pitch.scatter(
             [passer_xy[0]], [passer_xy[1]],
             s=160, ax=ax, color="gold",
             edgecolors="black", zorder=6,
-            label=f"Passer: {actor_name}",
+            label=passer_label,
         )
-    if dest_xy:
-        pitch.scatter(
-            [dest_xy[0]], [dest_xy[1]],
-            s=160, marker="x", ax=ax,
-            color="black", zorder=6, label="True destination",
-        )
-    if passer_xy and dest_xy:
-        pitch.arrows(
-            passer_xy[0], passer_xy[1],
-            dest_xy[0], dest_xy[1],
-            ax=ax, width=2, headwidth=6, headlength=6, color="black",
-        )
+    if swap_player is None:
+        if dest_xy:
+            pitch.scatter(
+                [dest_xy[0]], [dest_xy[1]],
+                s=160, marker="x", ax=ax,
+                color="black", zorder=6, label="True destination",
+            )
+        if passer_xy and dest_xy:
+            pitch.arrows(
+                passer_xy[0], passer_xy[1],
+                dest_xy[0], dest_xy[1],
+                ax=ax, width=2, headwidth=6, headlength=6, color="black",
+            )
+    else:
+        # original pass arrow (true destination)
+        if dest_xy:
+            pitch.scatter(
+                [dest_xy[0]], [dest_xy[1]],
+                s=160, marker="x", ax=ax,
+                color="black", zorder=6, label="True destination",
+            )
+        if passer_xy and dest_xy:
+            pitch.arrows(
+                passer_xy[0], passer_xy[1],
+                dest_xy[0], dest_xy[1],
+                ax=ax, width=2, headwidth=6, headlength=6, color="black",
+            )
+        # arrow toward highest probability cell
+        peak_idx = int(prob_flat.argmax())
+        peak_l, peak_w = peak_idx // W, peak_idx % W
+        peak_x = peak_l * (120.0 / L)
+        peak_y = peak_w * (80.0 / W)
+        if passer_xy:
+            pitch.arrows(
+                passer_xy[0], passer_xy[1],
+                peak_x, peak_y,
+                ax=ax, width=2, headwidth=6, headlength=6, color="blue",
+            )
+            pitch.scatter(
+                [peak_x], [peak_y],
+                s=160, marker="x", ax=ax,
+                color="blue", zorder=6, label="Predicted destination",
+            )
 
-    ax.set_title(
-        f"{actor_name} (embed_id={actor_id})\n"
-        f"p(dest)={p_dest:.6f} | completed={completed} | sample_idx={sample_idx}",
-        fontsize=11,
-    )
+    if swap_player is not None:
+        title = (
+            f"Swapped to {display_name} (embed_id={actor_id})\n"
+            f"Original passer: {actor_name} | completed={True if completed else False} | sample_idx={sample_idx}"
+        )
+    else:
+        title = (
+            f"{display_name} (embed_id={actor_id})\n"
+            f"p(dest)={p_dest:.6f} | completed={True if completed else False} | sample_idx={sample_idx}"
+        )
+    ax.set_title(title, fontsize=11)
     ax.legend(loc="upper left", fontsize=8)
-    plt.tight_layout()
+    # plt.tight_layout()
 
     if out_path:
         Path(out_path).parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(out_path, dpi=150, bbox_inches="tight")
 
-    if show:
-        plt.show()
-    else:
+    if not show:
         plt.close(fig)
 
     return fig
