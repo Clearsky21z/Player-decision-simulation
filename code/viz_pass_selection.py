@@ -13,9 +13,10 @@ import matplotlib.cm as cm
 from mplsoccer import Pitch
 
 from soccermap.statsbomb_io import load_events, load_threesixty, load_lineups
+from soccermap.context import DEFAULT_CONTEXT_DIM
 from soccermap.expand import build_expanded_dfs
 from soccermap.dataset import PassDataset
-from soccermap.model import SoccerMap, SoccerMapConfig
+from soccermap.model import SoccerMap, SoccerMapConfig, SoccerMapWithPlayerEmbed
 from soccermap.viz import _extract_scene, _to_img_yx, plot_pass_selection_surface
 
 
@@ -42,18 +43,46 @@ def main():
     lineups = load_lineups(args.data_root, args.match_id)
     m = build_expanded_dfs(events, threesixty, lineups)
 
-    ds = PassDataset(m.expanded_df, compute_velocities=args.compute_velocities, only_passes=True)
-    sample = ds[args.sample_idx]
-
-    model = SoccerMap(SoccerMapConfig()).to(args.device)
     ckpt = torch.load(args.ckpt, map_location=args.device)
     state = ckpt.get("model_state", ckpt)
+    dataset_context_dim = ckpt.get("context_dim", DEFAULT_CONTEXT_DIM)
+    ds = PassDataset(
+        m.expanded_df,
+        compute_velocities=args.compute_velocities,
+        only_passes=True,
+        context_dim=dataset_context_dim,
+    )
+    sample = ds[args.sample_idx]
+
+    cfg_kwargs = ckpt.get("config", {})
+    cfg = SoccerMapConfig(**cfg_kwargs) if cfg_kwargs else SoccerMapConfig()
+    uses_player_embed = any(k.startswith("player_embedding.") for k in state.keys())
+
+    if uses_player_embed:
+        model = SoccerMapWithPlayerEmbed(
+            num_players=ckpt.get("num_players", 0),
+            embed_dim=ckpt.get("embed_dim", 8),
+            context_dim=ckpt.get("context_dim", 0),
+            context_hidden_dim=ckpt.get("context_hidden_dim", 16),
+            context_embed_dim=ckpt.get("context_embed_dim", 8),
+            cfg=cfg,
+        ).to(args.device)
+    else:
+        model = SoccerMap(cfg).to(args.device)
+
     model.load_state_dict(state)
     model.eval()
 
     with torch.no_grad():
-        x = sample.channels.unsqueeze(0).to(args.device)   # (1,13,L,W)
-        logits = model(x)                                  # (1,1,L,W)
+        x = sample.channels.unsqueeze(0).to(args.device)   # (1,14,L,W)
+        if uses_player_embed:
+            player_id_mapping = ckpt.get("player_id_mapping", {})
+            actor_id = player_id_mapping.get(sample.actor_player_name, 0)
+            actor_ids = torch.tensor([actor_id], dtype=torch.long, device=args.device)
+            context = sample.context_features.unsqueeze(0).to(args.device)
+            logits = model(x, actor_ids, context)          # (1,1,L,W)
+        else:
+            logits = model(x)                              # (1,1,L,W)
 
         # Softmax over all cells (selection distribution)
         flat = logits.view(1, -1)
@@ -133,8 +162,9 @@ def plot_pass_selection_embed(
     # ---- Forward pass ----
     with torch.no_grad():
         x = sample.channels.unsqueeze(0)
+        context = sample.context_features.unsqueeze(0)
         actor_ids = torch.tensor([actor_id], dtype=torch.long)
-        logits = model(x, actor_ids)
+        logits = model(x, actor_ids, context)
 
         flat = logits.view(1, -1)
         prob_flat = torch.softmax(flat, dim=1)[0]

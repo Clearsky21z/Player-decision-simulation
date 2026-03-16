@@ -8,6 +8,7 @@ import torch
 from torch.utils.data import DataLoader, ConcatDataset, random_split
 
 from soccermap.statsbomb_io import load_events, load_threesixty, load_lineups
+from soccermap.context import context_feature_names
 from soccermap.expand import build_expanded_dfs, build_player_id_mapping
 from soccermap.dataset import PassDataset
 from soccermap.model import SoccerMapWithPlayerEmbed, SoccerMapConfig, pass_selection_kl_loss
@@ -55,6 +56,10 @@ def main():
     ap.add_argument("--compute_velocities", action="store_true")
     ap.add_argument("--val_split", type=float, default=0.15)
     ap.add_argument("--embed_team", type=str, default="Bayer Leverkusen")
+    ap.add_argument("--embed_dim", type=int, default=8)
+    ap.add_argument("--context_dim", type=int, default=8)
+    ap.add_argument("--context_hidden_dim", type=int, default=16)
+    ap.add_argument("--context_embed_dim", type=int, default=8)
     ap.add_argument("--out_ckpt", type=str, default="checkpoints/pass_selection.pt")
     args = ap.parse_args()
 
@@ -101,6 +106,7 @@ def main():
             compute_velocities=args.compute_velocities,
             only_passes=True,
             team_filter=args.embed_team,
+            context_dim=args.context_dim,
         )
 
         ds_list.append(ds_mid)
@@ -123,7 +129,10 @@ def main():
 
     model = SoccerMapWithPlayerEmbed(
         num_players=num_players,
-        embed_dim=8,
+        embed_dim=args.embed_dim,
+        context_dim=args.context_dim,
+        context_hidden_dim=args.context_hidden_dim,
+        context_embed_dim=args.context_embed_dim,
         cfg=SoccerMapConfig(),
     ).to(args.device)
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
@@ -135,13 +144,14 @@ def main():
         train_n = 0
         for batch in train_dl:
             channels = torch.stack([b.channels for b in batch]).to(args.device)
+            context = torch.stack([b.context_features for b in batch]).to(args.device)
             dest = torch.tensor([b.dest_index for b in batch], dtype=torch.long, device=args.device)
             actor_ids = torch.tensor(
                 [player_id_mapping.get(b.actor_player_name, 0) for b in batch],
                 dtype=torch.long, device=args.device,
             )
 
-            logits = model(channels, actor_ids)
+            logits = model(channels, actor_ids, context)
             loss = pass_selection_kl_loss(logits, dest)
 
             opt.zero_grad()
@@ -158,13 +168,14 @@ def main():
         with torch.no_grad():
             for batch in val_dl:
                 channels = torch.stack([b.channels for b in batch]).to(args.device)
+                context = torch.stack([b.context_features for b in batch]).to(args.device)
                 dest = torch.tensor([b.dest_index for b in batch], dtype=torch.long, device=args.device)
                 actor_ids = torch.tensor(
                     [player_id_mapping.get(b.actor_player_name, 0) for b in batch],
                     dtype=torch.long, device=args.device,
                 )
 
-                logits = model(channels, actor_ids)
+                logits = model(channels, actor_ids, context)
                 loss = pass_selection_kl_loss(logits, dest)
 
                 val_total += float(loss.item()) * len(channels)
@@ -185,7 +196,11 @@ def main():
             "config": SoccerMapConfig().__dict__,
             "player_id_mapping": player_id_mapping,
             "num_players": num_players,
-            "embed_dim": 8,
+            "embed_dim": args.embed_dim,
+            "context_dim": args.context_dim,
+            "context_hidden_dim": args.context_hidden_dim,
+            "context_embed_dim": args.context_embed_dim,
+            "context_feature_names": context_feature_names(args.context_dim),
         },
         out_path,
     )

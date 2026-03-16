@@ -43,6 +43,27 @@ def _pass_completed(event: Dict[str, Any]) -> Optional[int]:
     return 1 if outcome is None else 0
 
 
+def _scoring_team(
+    event: Dict[str, Any],
+    team1: Optional[str] = None,
+    team2: Optional[str] = None,
+) -> Optional[str]:
+    event_type = (event.get("type") or {}).get("name")
+    team = (event.get("team") or {}).get("name")
+
+    if event_type == "Shot":
+        shot = event.get("shot")
+        if isinstance(shot, dict):
+            outcome = (shot.get("outcome") or {}).get("name")
+            if outcome == "Goal":
+                return team
+
+    if event_type == "Own Goal For":
+        return team
+
+    return None
+
+
 def build_expanded_dfs(
     events: List[Dict[str, Any]],
     threesixty: List[Dict[str, Any]],
@@ -72,20 +93,31 @@ def build_expanded_dfs(
     event_rows: List[Dict[str, Any]] = []
     expanded_rows: List[Dict[str, Any]] = []
 
-    for ev in events:
+    score_by_team: Dict[str, int] = {}
+
+    for event_order, ev in enumerate(events):
         ev_id = ev.get("id")
         if ev_id is None:
             continue
 
         ff = ff_by_uuid.get(ev_id)
-        if ff is None and not keep_all_events:
-            continue
 
         team = (ev.get("team") or {}).get("name")
         # infer opponent team if possible
         opp_team = None
         if team1 and team2 and team:
             opp_team = team2 if team == team1 else (team1 if team == team2 else None)
+
+        team_score = int(score_by_team.get(str(team), 0)) if team else 0
+        opponent_score = int(score_by_team.get(str(opp_team), 0)) if opp_team else 0
+        score_diff = team_score - opponent_score
+        event_index = int(ev.get("index", event_order))
+        scoring_team = _scoring_team(ev, team1=team1, team2=team2)
+
+        if ff is None and not keep_all_events:
+            if scoring_team:
+                score_by_team[scoring_team] = score_by_team.get(scoring_team, 0) + 1
+            continue
 
         # Actor identity
         player_info = ev.get("player") or {}
@@ -102,12 +134,16 @@ def build_expanded_dfs(
 
         event_rows.append({
             "event_id": ev_id,
+            "event_index": event_index,
             "minute": minute,
             "second": second,
             "period": period,
             "event_type": event_type,
             "team": team,
             "opponent_team": opp_team,
+            "team_score": team_score,
+            "opponent_score": opponent_score,
+            "score_diff": score_diff,
             "event_location": loc,
             "end_location": end_loc,
             "pass_completed": completed,
@@ -118,11 +154,15 @@ def build_expanded_dfs(
         # Actor row (unique)
         expanded_rows.append({
             "event_id": ev_id,
+            "event_index": event_index,
             "actor": True,
             "teammate": True,
             "keeper": False,
             "team": team,
             "opponent_team": opp_team,
+            "team_score": team_score,
+            "opponent_score": opponent_score,
+            "score_diff": score_diff,
             "minute": minute,
             "second": second,
             "period": period,
@@ -137,6 +177,8 @@ def build_expanded_dfs(
         })
 
         if ff is None:
+            if scoring_team:
+                score_by_team[scoring_team] = score_by_team.get(scoring_team, 0) + 1
             continue
 
         freeze = ff.get("freeze_frame") or []
@@ -156,11 +198,15 @@ def build_expanded_dfs(
 
             expanded_rows.append({
                 "event_id": ev_id,
+                "event_index": event_index,
                 "actor": False,
                 "teammate": teammate,
                 "keeper": bool(p.get("keeper")),
                 "team": pteam,
                 "opponent_team": (opp_team if teammate else team),
+                "team_score": team_score if teammate else opponent_score,
+                "opponent_score": opponent_score if teammate else team_score,
+                "score_diff": score_diff if teammate else -score_diff,
                 "minute": minute,
                 "second": second,
                 "period": period,
@@ -175,10 +221,15 @@ def build_expanded_dfs(
             })
             ff_idx += 1
 
+        if scoring_team:
+            score_by_team[scoring_team] = score_by_team.get(scoring_team, 0) + 1
+
     event_df = pd.DataFrame(event_rows)
     expanded_df = pd.DataFrame(expanded_rows)
 
     # Useful derived columns
+    if not event_df.empty:
+        event_df["total_seconds"] = event_df["minute"].fillna(0).astype(float) * 60.0 + event_df["second"].fillna(0).astype(float)
     if not expanded_df.empty:
         expanded_df["total_seconds"] = expanded_df["minute"].fillna(0).astype(float) * 60.0 + expanded_df["second"].fillna(0).astype(float)
 

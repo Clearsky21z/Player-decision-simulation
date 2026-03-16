@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Optional
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -174,18 +175,23 @@ class SoccerMap(nn.Module):
 
 class SoccerMapWithPlayerEmbed(nn.Module):
     """
-    SoccerMap with a learnable player embedding injected at the end.
+    SoccerMap with late-fused player identity and game-context conditioning.
     """
 
     def __init__(
         self,
         num_players: int,
         embed_dim: int = 8,
+        context_dim: int = 0,
+        context_hidden_dim: int = 16,
+        context_embed_dim: int = 8,
         cfg: SoccerMapConfig = SoccerMapConfig(),
     ):
         super().__init__()
         self.cfg = cfg
         self.embed_dim = embed_dim
+        self.context_dim = context_dim
+        self.context_embed_dim = context_embed_dim if context_dim > 0 else 0
 
         # Player embedding table (index 0 = unknown / padding)
         self.player_embedding = nn.Embedding(
@@ -193,6 +199,17 @@ class SoccerMapWithPlayerEmbed(nn.Module):
             embedding_dim=embed_dim,
             padding_idx=0,
         )
+
+        self.context_ffn: Optional[nn.Sequential]
+        if self.context_dim > 0:
+            self.context_ffn = nn.Sequential(
+                nn.Linear(context_dim, context_hidden_dim),
+                nn.ReLU(),
+                nn.Linear(context_hidden_dim, self.context_embed_dim),
+                nn.ReLU(),
+            )
+        else:
+            self.context_ffn = None
 
         # --- Backbone (identical to SoccerMap) ---
         self.feat1 = Conv5x5FeatBlock(cfg.in_channels, cfg.feat_channels, cfg.pad_mode)
@@ -213,15 +230,21 @@ class SoccerMapWithPlayerEmbed(nn.Module):
         self.up23_to_1 = Upsample2xBlock(cfg.up_channels, cfg.pad_mode)
         self.fuse123 = FusePair()
 
-        # --- Embedding projection head (for end injection) ---
-        self.embed_head = nn.Conv2d(1 + embed_dim, 1, kernel_size=1)
+        # --- Late fusion head for identity + compact game context ---
+        self.embed_head = nn.Conv2d(1 + embed_dim + self.context_embed_dim, 1, kernel_size=1)
 
-    def forward(self, x: torch.Tensor, actor_ids: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self,
+        x: torch.Tensor,
+        actor_ids: torch.Tensor,
+        context: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
         """
         Parameters
         ----------
         x : (N, 14, H, W) channel tensor
         actor_ids : (N,) long tensor of player embedding indices
+        context : (N, context_dim) dense match-context features
 
         Returns
         -------
@@ -245,14 +268,31 @@ class SoccerMapWithPlayerEmbed(nn.Module):
         p23_up = self.up23_to_1(p23)
         p123 = self.fuse123(p1, p23_up)  # (N, 1, H, W)
 
-        # --- PLAYER EMBEDDING INJECTION ---
-        # To move the injection point, relocate this block.
-        # Currently: inject at the END (after CNN, before output).
+        # --- LATE FUSION ---
+        # Keep the spatial backbone intact, then inject player identity and
+        # compact game context after the original SoccerMap output surface.
         embed = self.player_embedding(actor_ids)               # (N, D)
         embed_spatial = embed[:, :, None, None].expand(N, self.embed_dim, H, W)  # (N, D, H, W)
-        fused = torch.cat([p123, embed_spatial], dim=1)        # (N, 1+D, H, W)
+        fusion_parts = [p123, embed_spatial]
+
+        if self.context_ffn is not None:
+            if context is None:
+                context = torch.zeros(
+                    (N, self.context_dim),
+                    dtype=x.dtype,
+                    device=x.device,
+                )
+            elif context.shape != (N, self.context_dim):
+                raise ValueError(
+                    f"context must have shape {(N, self.context_dim)}, got {tuple(context.shape)}"
+                )
+            context_embed = self.context_ffn(context)
+            context_spatial = context_embed[:, :, None, None].expand(N, self.context_embed_dim, H, W)
+            fusion_parts.append(context_spatial)
+
+        fused = torch.cat(fusion_parts, dim=1)
         logits = self.embed_head(fused)                        # (N, 1, H, W)
-        # --- END PLAYER EMBEDDING INJECTION ---
+        # --- END LATE FUSION ---
 
         return logits
 
@@ -332,5 +372,4 @@ def pass_selection_surface(logits: torch.Tensor) -> torch.Tensor:
     N, _, H, W = logits.shape
     flat = logits.view(N, -1)
     return torch.softmax(flat, dim=1).view(N, H, W)  # sums to 1
-
 
