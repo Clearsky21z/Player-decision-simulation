@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 
-DEFAULT_CONTEXT_DIM = 8
+DEFAULT_CONTEXT_DIM = 9
 DEFAULT_CONTEXT_FEATURE_NAMES = (
     "team_score",
     "opponent_score",
@@ -16,6 +16,7 @@ DEFAULT_CONTEXT_FEATURE_NAMES = (
     "phase_mid",
     "phase_late",
     "phase_extra",
+    "pass_completed",
 )
 
 
@@ -64,11 +65,12 @@ def build_context_features(
     """
     Build a compact, non-spatial game-context vector for late fusion.
 
-    The first 8 slots are pure game-state features:
+    The first 9 slots are compact game-state features:
       - scoreline from the acting team's perspective (2)
       - score differential (1)
       - normalized match time (1)
       - match phase one-hot (4)
+      - realised pass completion label (1)
 
     If ``context_dim`` is smaller we truncate; if larger we zero-pad.
     """
@@ -99,6 +101,12 @@ def build_context_features(
     total_seconds = max(0.0, minute * 60.0 + second)
     base[3] = min(total_seconds / (120.0 * 60.0), 1.0)
     base[4:8] = _encode_match_phase(minute)
+
+    completed = actor_row.get("pass_completed")
+    if pd.isna(completed):
+        base[8] = 0.0
+    else:
+        base[8] = float(completed)
 
     return _resize_context(base, context_dim)
 
