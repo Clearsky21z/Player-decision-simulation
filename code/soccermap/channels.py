@@ -345,9 +345,6 @@ def compute_player_velocities(
 
     return vel
 
-# =============================================================================
-# Main channel creator (same API, refactored)
-# =============================================================================
 def create_14_channels(
         expanded_df: pd.DataFrame,
         event_id: str,
@@ -411,12 +408,12 @@ def create_14_channels(
         opps = players.loc[players["teammate"] == False]
 
         # locations
-        #_place_sparse_counts(chans, mates, grid, ch_loc=0)
-        #_place_sparse_counts(chans, opps, grid, ch_loc=1)
+        _place_sparse_counts(chans, mates, grid, ch_loc=0)
+        _place_sparse_counts(chans, opps, grid, ch_loc=1)
 
         # locations (Gaussian instead of sparse counts)
-        _place_gaussian_locations(chans, mates, grid, ch_loc=0, sigma_l=1.5, sigma_w=1.5, truncate=3.0, mode="add")
-        _place_gaussian_locations(chans, opps, grid, ch_loc=1, sigma_l=1.5, sigma_w=1.5, truncate=3.0, mode="add")
+        # _place_gaussian_locations(chans, mates, grid, ch_loc=0, sigma_l=1.5, sigma_w=1.5, truncate=3.0, mode="add")
+        # _place_gaussian_locations(chans, opps, grid, ch_loc=1, sigma_l=1.5, sigma_w=1.5, truncate=3.0, mode="add")
 
         # velocities (optional)
         _place_sparse_velocities(chans, mates, grid, ch_vx=2, ch_vy=3, velocity_dict=velocity_dict)

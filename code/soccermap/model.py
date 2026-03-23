@@ -13,7 +13,6 @@ import torch.nn.functional as F
 class SoccerMapConfig:
     """
     Matches the paper's described components.
-
     """
     in_channels: int = 14
 
@@ -175,7 +174,7 @@ class SoccerMap(nn.Module):
 
 class SoccerMapWithPlayerEmbed(nn.Module):
     """
-    SoccerMap with late-fused player identity and game-context conditioning.
+    SoccerMap with FiLM-conditioned spatial features and late-fused game context.
     """
 
     def __init__(
@@ -211,8 +210,10 @@ class SoccerMapWithPlayerEmbed(nn.Module):
         else:
             self.context_ffn = None
 
-        # --- Backbone (identical to SoccerMap) ---
-        self.feat1 = Conv5x5FeatBlock(cfg.in_channels, cfg.feat_channels, cfg.pad_mode)
+        # --- Backbone ---
+        # Condition the model early by concatenating the player embedding to
+        # the input channels before feature extraction begins.
+        self.feat1 = Conv5x5FeatBlock(cfg.in_channels + embed_dim, cfg.feat_channels, cfg.pad_mode)
         self.pool1 = nn.MaxPool2d(2)
 
         self.feat2 = Conv5x5FeatBlock(cfg.feat_channels, cfg.feat_channels, cfg.pad_mode)
@@ -232,6 +233,23 @@ class SoccerMapWithPlayerEmbed(nn.Module):
 
         # --- Late fusion head for identity + compact game context ---
         self.embed_head = nn.Conv2d(1 + embed_dim + self.context_embed_dim, 1, kernel_size=1)
+        # FiLM layers modulate intermediate feature maps using the player
+        # embedding so different actors can alter the spatial representation.
+        self.film1 = nn.Linear(embed_dim, 2 * cfg.feat_channels)
+        self.film2 = nn.Linear(embed_dim, 2 * cfg.feat_channels)
+        self.film3 = nn.Linear(embed_dim, 2 * cfg.feat_channels)
+        nn.init.zeros_(self.film1.weight)
+        nn.init.zeros_(self.film1.bias)
+        nn.init.zeros_(self.film2.weight)
+        nn.init.zeros_(self.film2.bias)
+        nn.init.zeros_(self.film3.weight)
+        nn.init.zeros_(self.film3.bias)
+
+
+    def _apply_film(self, h: torch.Tensor, embed: torch.Tensor, film: nn.Linear) -> torch.Tensor:
+        gamma_beta = film(embed)
+        gamma, beta = torch.chunk(gamma_beta, 2, dim=1)
+        return h * (1.0 + gamma[:, :, None, None]) + beta[:, :, None, None]
 
     def forward(
         self,
@@ -250,16 +268,22 @@ class SoccerMapWithPlayerEmbed(nn.Module):
         -------
         logits : (N, 1, H, W)
         """
-        N, C, H, W = x.shape
+        N, _, H, W = x.shape
 
-        # --- Backbone (player-agnostic) ---
+        embed = self.player_embedding(actor_ids)  # (N, D)
+        embed_spatial = embed[:, :, None, None].expand(N, self.embed_dim, H, W)
+        x = torch.cat([x, embed_spatial], dim=1)
+
         h1 = self.feat1(x)
+        h1 = self._apply_film(h1, embed, self.film1)
         p1 = self.pred1(h1)
 
         h2 = self.feat2(self.pool1(h1))
+        h2 = self._apply_film(h2, embed, self.film2)
         p2 = self.pred2(h2)
 
         h3 = self.feat3(self.pool2(h2))
+        h3 = self._apply_film(h3, embed, self.film3)
         p3 = self.pred3(h3)
 
         p3_up = self.up3_to_2(p3)
@@ -269,9 +293,7 @@ class SoccerMapWithPlayerEmbed(nn.Module):
         p123 = self.fuse123(p1, p23_up)  # (N, 1, H, W)
 
         # --- LATE FUSION ---
-        # Keep the spatial backbone intact, then inject player identity and
-        # compact game context after the original SoccerMap output surface.
-        embed = self.player_embedding(actor_ids)               # (N, D)
+        # Reuse embed from early fusion; broadcast spatially for concat.
         embed_spatial = embed[:, :, None, None].expand(N, self.embed_dim, H, W)  # (N, D, H, W)
         fusion_parts = [p123, embed_spatial]
 
@@ -356,11 +378,65 @@ def pass_selection_kl_loss(logits: torch.Tensor, dest_index: torch.Tensor, sigma
     return F.kl_div(log_p, q, reduction="batchmean")
 
 
+def pass_selection_teammate_kl_loss(
+    logits: torch.Tensor,
+    dest_index: torch.Tensor,
+    teammate_channel: torch.Tensor,
+    sigma: float = 2.0,
+    dest_weight: float = 0.5,
+) -> torch.Tensor:
+    """
+    The target is a
+    mixture of Gaussians placed at every teammate location (from channel 0) plus
+    the true destination.  The destination component receives ``dest_weight`` of
+    the total mass; the remaining ``1 - dest_weight`` is split evenly across
+    teammate locations.  This produces multi-modal, non-circular targets shaped
+    by the actual game geometry.
+    """
+    N, _, H, W = logits.shape
+    flat_logits = logits.view(N, H * W)
+    log_p = F.log_softmax(flat_logits, dim=1)
 
-# TODO
-# we need to create a new loss function for pass selection model
-# 1. We have to make the true pass a guassian field N(0,2)
-# 2. then our loss function will be minimizing KL divergence between the predicted distribution and the true distribution
+    coords_l = torch.arange(H, device=logits.device).float()
+    coords_w = torch.arange(W, device=logits.device).float()
+    grid_l, grid_w = torch.meshgrid(coords_l, coords_w, indexing="ij")  # (H, W)
+
+    # destination Gaussian — same as original KL loss
+    dest_l = (dest_index // W).float()
+    dest_w = (dest_index %  W).float()
+    diff_l = grid_l.unsqueeze(0) - dest_l.view(N, 1, 1)
+    diff_w = grid_w.unsqueeze(0) - dest_w.view(N, 1, 1)
+    dest_gauss = torch.exp(-(diff_l ** 2 + diff_w ** 2) / (2 * sigma ** 2))  # (N, H, W)
+
+    # teammate Gaussians — one per nonzero cell in teammate_channel
+    tm_gauss = torch.zeros(N, H, W, device=logits.device)
+    for i in range(N):
+        locs = (teammate_channel[i] > 0).nonzero(as_tuple=False)  # (K, 2)
+        if locs.shape[0] == 0:
+            continue
+        tl = locs[:, 0].float()  # (K,)
+        tw = locs[:, 1].float()  # (K,)
+        dl = grid_l.unsqueeze(0) - tl.view(-1, 1, 1)  # (K, H, W)
+        dw = grid_w.unsqueeze(0) - tw.view(-1, 1, 1)
+        per_tm = torch.exp(-(dl ** 2 + dw ** 2) / (2 * sigma ** 2))  # (K, H, W)
+        tm_gauss[i] = per_tm.mean(dim=0)  # average over teammates
+
+    # normalise each component independently before mixing
+    dest_flat = dest_gauss.view(N, H * W)
+    dest_flat = dest_flat / dest_flat.sum(dim=1, keepdim=True).clamp(min=1e-8)
+
+    tm_flat = tm_gauss.view(N, H * W)
+    tm_sum = tm_flat.sum(dim=1, keepdim=True)
+    has_teammates = (tm_sum > 1e-8).float()
+    tm_flat = tm_flat / tm_sum.clamp(min=1e-8)
+
+    # mix: if no teammates detected, fall back to dest-only
+    q = dest_weight * dest_flat + (1.0 - dest_weight) * has_teammates * tm_flat
+    # re-normalise (handles the no-teammate fallback case)
+    q = q / q.sum(dim=1, keepdim=True).clamp(min=1e-8)
+
+    return F.kl_div(log_p, q, reduction="batchmean")
+
 
 @torch.no_grad()
 def pass_success_surface(logits: torch.Tensor) -> torch.Tensor:

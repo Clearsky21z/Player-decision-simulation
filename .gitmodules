@@ -1,3 +1,0 @@
-[submodule "data/open-data"]
-	path = data/open-data
-	url = https://github.com/statsbomb/open-data.git

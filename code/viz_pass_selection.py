@@ -16,7 +16,7 @@ from soccermap.statsbomb_io import load_events, load_threesixty, load_lineups
 from soccermap.context import DEFAULT_CONTEXT_DIM
 from soccermap.expand import build_expanded_dfs
 from soccermap.dataset import PassDataset
-from soccermap.model import SoccerMap, SoccerMapConfig, SoccerMapWithPlayerEmbed
+from soccermap.model import SoccerMap, SoccerMapConfig, SoccerMapWithPlayerEmbed, SoccerMapWithPlayerEmbed
 from soccermap.viz import _extract_scene, _to_img_yx, plot_pass_selection_surface
 
 
@@ -29,6 +29,7 @@ def main():
     ap.add_argument("--out", type=str, default="viz/pass_selection_surface.png")
     ap.add_argument("--device", type=str, default="cpu")
     ap.add_argument("--compute_velocities", action="store_true")
+    ap.add_argument("--swap_player", type=str, default="")
 
     # NEW
     ap.add_argument("--scale", type=str, default="log", choices=["log", "percentile", "linear"])
@@ -42,6 +43,9 @@ def main():
     threesixty = load_threesixty(args.data_root, args.match_id)
     lineups = load_lineups(args.data_root, args.match_id)
     m = build_expanded_dfs(events, threesixty, lineups)
+
+    ds = PassDataset(m.expanded_df, compute_velocities=args.compute_velocities, only_passes=True)
+    sample = ds[args.sample_idx]
 
     ckpt = torch.load(args.ckpt, map_location=args.device)
     state = ckpt.get("model_state", ckpt)
@@ -70,6 +74,20 @@ def main():
     else:
         model = SoccerMap(cfg).to(args.device)
 
+    conditioning = ckpt.get("conditioning", "")
+    player_id_mapping = ckpt.get("player_id_mapping", {})
+    embed_dim = int(ckpt.get("embed_dim", 8))
+
+    if conditioning == "input_concat+film":
+        num_players = int(ckpt["num_players"])
+        model = SoccerMapWithPlayerEmbed(
+            num_players=num_players,
+            embed_dim=embed_dim,
+            cfg=SoccerMapConfig(),
+        ).to(args.device)
+    else:
+        model = SoccerMap(SoccerMapConfig()).to(args.device)
+
     model.load_state_dict(state)
     model.eval()
 
@@ -93,7 +111,13 @@ def main():
         W = logits.shape[3]
         prob_LW = prob_flat.view(L, W).cpu().numpy()
 
-    title = f"Sample idx={args.sample_idx} | p(dest cell)={p_dest:.6f} | true complete={sample.completed}"
+    if conditioning == "input_concat+film":
+        title = (
+            f"Sample idx={args.sample_idx} | actor={args.swap_player.strip() or sample.actor_player_name} | "
+            f"p(dest cell)={p_dest:.6f} | true complete={sample.completed}"
+        )
+    else:
+        title = f"Sample idx={args.sample_idx} | p(dest cell)={p_dest:.6f} | true complete={sample.completed}"
 
     out_path = Path(args.out)
     plot_pass_selection_surface(
@@ -305,7 +329,7 @@ def plot_pass_selection_embed(
     if not show:
         plt.close(fig)
 
-    return fig
+    return fig, prob_LW
 
 
 if __name__ == "__main__":

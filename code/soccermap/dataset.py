@@ -61,6 +61,7 @@ class PassDataset(Dataset):
             actor = actor[actor["event_type"] == "Pass"]
         if team_filter:
             actor = actor[actor["team"] == team_filter]
+
         # must have end_location
         actor = actor[actor["end_location"].notna()]
         sort_cols = ["total_seconds"]

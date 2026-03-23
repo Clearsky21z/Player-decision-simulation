@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from typing import List
+from typing import List, Sequence
 
 import torch
 from torch.utils.data import DataLoader, ConcatDataset, random_split
@@ -11,7 +11,14 @@ from soccermap.statsbomb_io import load_events, load_threesixty, load_lineups
 from soccermap.context import DEFAULT_CONTEXT_DIM, context_feature_names
 from soccermap.expand import build_expanded_dfs, build_player_id_mapping
 from soccermap.dataset import PassDataset
-from soccermap.model import SoccerMapWithPlayerEmbed, SoccerMapConfig, pass_selection_kl_loss
+from soccermap.model import (
+    SoccerMapConfig,
+    SoccerMapWithPlayerEmbed,
+    pass_selection_kl_loss,
+    pass_selection_loss,
+    pass_selection_teammate_kl_loss,
+    pass_selection_surface,
+)
 
 
 def list_available_match_ids(data_root: str) -> List[str]:
@@ -38,6 +45,66 @@ def parse_id_list(s: str) -> List[str]:
     return [x.strip() for x in s.split(",") if x.strip()]
 
 
+def _batch_to_tensors(
+    batch: Sequence,
+    player_id_mapping: dict[str, int],
+    device: str,
+):
+    channels = torch.stack([b.channels for b in batch]).to(device)
+    dest = torch.tensor([b.dest_index for b in batch], dtype=torch.long, device=device)
+    actor_ids = torch.tensor(
+        [player_id_mapping.get(b.actor_player_name, 0) for b in batch],
+        dtype=torch.long,
+        device=device,
+    )
+    return channels, dest, actor_ids
+
+
+def _embedding_norm_summary(model: SoccerMapWithPlayerEmbed) -> tuple[float, float]:
+    weights = model.player_embedding.weight.detach()[1:]
+    if weights.numel() == 0:
+        return 0.0, 0.0
+    norms = weights.norm(dim=1)
+    return float(norms.mean().item()), float(norms.max().item())
+
+
+def _roll_to_distinct_nonzero(actor_ids: torch.Tensor) -> torch.Tensor:
+    if actor_ids.numel() <= 1:
+        return actor_ids
+
+    swapped = actor_ids.roll(shifts=1)
+    same_or_unknown = (swapped == actor_ids) | (swapped == 0) | (actor_ids == 0)
+
+    if torch.all(~same_or_unknown):
+        return swapped
+
+    nonzero = actor_ids[actor_ids != 0].unique()
+    if nonzero.numel() <= 1:
+        return actor_ids
+
+    replacement = nonzero.roll(shifts=1)
+    out = actor_ids.clone()
+    for src, dst in zip(nonzero.tolist(), replacement.tolist()):
+        mask = actor_ids == src
+        out[mask] = dst
+    return out
+
+
+@torch.no_grad()
+def _swap_surface_delta(
+    model: SoccerMapWithPlayerEmbed,
+    channels: torch.Tensor,
+    actor_ids: torch.Tensor,
+) -> float:
+    swapped_ids = _roll_to_distinct_nonzero(actor_ids)
+    if torch.equal(swapped_ids, actor_ids):
+        return 0.0
+
+    orig_surface = pass_selection_surface(model(channels, actor_ids))
+    swapped_surface = pass_selection_surface(model(channels, swapped_ids))
+    return float((orig_surface - swapped_surface).abs().mean().item())
+
+
 def main():
     ap = argparse.ArgumentParser()
 
@@ -56,6 +123,9 @@ def main():
     ap.add_argument("--compute_velocities", action="store_true")
     ap.add_argument("--val_split", type=float, default=0.15)
     ap.add_argument("--embed_team", type=str, default="Bayer Leverkusen")
+    ap.add_argument("--loss", type=str, default="teammate_kl",
+                    choices=["kl", "ce", "teammate_kl"],
+                    help="Loss function: kl (Gaussian KL), ce (cross-entropy), teammate_kl (teammate-weighted KL)")
     ap.add_argument("--embed_dim", type=int, default=8)
     ap.add_argument("--context_dim", type=int, default=DEFAULT_CONTEXT_DIM)
     ap.add_argument("--context_hidden_dim", type=int, default=16)
@@ -126,6 +196,7 @@ def main():
     collate = lambda batch: batch  # PassDataset returns dataclasses
     train_dl = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=0, collate_fn=collate)
     val_dl = DataLoader(val_ds, batch_size=args.batch_size, shuffle=False, num_workers=0, collate_fn=collate)
+    fixed_val_batch = next(iter(val_dl), None)
 
     model = SoccerMapWithPlayerEmbed(
         num_players=num_players,
@@ -136,6 +207,15 @@ def main():
         cfg=SoccerMapConfig(),
     ).to(args.device)
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
+    print(f"Model conditioning: input_concat+film | loss: {args.loss}")
+
+    def _compute_loss(logits, dest, channels):
+        if args.loss == "kl":
+            return pass_selection_kl_loss(logits, dest)
+        elif args.loss == "ce":
+            return pass_selection_loss(logits, dest)
+        else:  # teammate_kl
+            return pass_selection_teammate_kl_loss(logits, dest, channels[:, 0])
 
     for ep in range(args.epochs):
         # --- training ---
@@ -143,16 +223,11 @@ def main():
         train_total = 0.0
         train_n = 0
         for batch in train_dl:
-            channels = torch.stack([b.channels for b in batch]).to(args.device)
+            channels, dest, actor_ids = _batch_to_tensors(batch, player_id_mapping, args.device)
             context = torch.stack([b.context_features for b in batch]).to(args.device)
-            dest = torch.tensor([b.dest_index for b in batch], dtype=torch.long, device=args.device)
-            actor_ids = torch.tensor(
-                [player_id_mapping.get(b.actor_player_name, 0) for b in batch],
-                dtype=torch.long, device=args.device,
-            )
 
             logits = model(channels, actor_ids, context)
-            loss = pass_selection_kl_loss(logits, dest)
+            loss = _compute_loss(logits, dest, channels)
 
             opt.zero_grad()
             loss.backward()
@@ -167,23 +242,27 @@ def main():
         val_n = 0
         with torch.no_grad():
             for batch in val_dl:
-                channels = torch.stack([b.channels for b in batch]).to(args.device)
+                channels, dest, actor_ids = _batch_to_tensors(batch, player_id_mapping, args.device)
                 context = torch.stack([b.context_features for b in batch]).to(args.device)
-                dest = torch.tensor([b.dest_index for b in batch], dtype=torch.long, device=args.device)
-                actor_ids = torch.tensor(
-                    [player_id_mapping.get(b.actor_player_name, 0) for b in batch],
-                    dtype=torch.long, device=args.device,
-                )
 
                 logits = model(channels, actor_ids, context)
-                loss = pass_selection_kl_loss(logits, dest)
+                loss = _compute_loss(logits, dest, channels)
 
                 val_total += float(loss.item()) * len(channels)
                 val_n += len(channels)
 
         train_loss = train_total / max(train_n, 1)
         val_loss = val_total / max(val_n, 1)
-        print(f"epoch {ep+1}/{args.epochs}  train_loss={train_loss:.4f}  val_loss={val_loss:.4f}")
+        mean_norm, max_norm = _embedding_norm_summary(model)
+        swap_delta = 0.0
+        if fixed_val_batch:
+            fixed_channels, _, fixed_actor_ids = _batch_to_tensors(fixed_val_batch, player_id_mapping, args.device)
+            swap_delta = _swap_surface_delta(model, fixed_channels, fixed_actor_ids)
+        print(
+            f"epoch {ep+1}/{args.epochs}  train_loss={train_loss:.4f}  "
+            f"val_loss={val_loss:.4f}  embed_norm_mean={mean_norm:.4f}  "
+            f"embed_norm_max={max_norm:.4f}  swap_l1={swap_delta:.6f}"
+        )
 
     # Save checkpoint for visualization / later evaluation
     out_path = Path(args.out_ckpt)
@@ -191,6 +270,8 @@ def main():
     torch.save(
         {
             "model_state": model.state_dict(),
+            "model_type": "soccermap_player_conditioned",
+            "conditioning": "input_concat+film",
             "train_match_ids": train_ids,
             "holdout_match_id": holdout,
             "config": SoccerMapConfig().__dict__,
