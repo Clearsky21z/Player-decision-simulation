@@ -14,7 +14,7 @@ class SoccerMapConfig:
     """
     Matches the paper's described components.
     """
-    in_channels: int = 14
+    in_channels: int = 15
 
     feat_channels: int = 32
 

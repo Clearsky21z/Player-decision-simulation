@@ -215,6 +215,69 @@ def _dense_angle_to_point(gx: np.ndarray, gy: np.ndarray, tx: float, ty: float) 
     return np.arctan2((ty - gy), (tx - gx)).astype(np.float32)
 
 
+def build_directional_pressure_map(
+        passer_xy,
+        defenders: pd.DataFrame,
+        grid: GridSpec,
+        *,
+        sigma_dest: float = 4.0,
+        lambda_dir: float = 0.25,
+        side_weight: float = 1.0,
+        back_weight: float = 0.75,
+        front_weight: float = 1.25,
+        eps: float = 1e-6,
+) -> np.ndarray:
+    """
+    Build a dense defender pressure map.
+
+    Pressure exists in all directions around the defender, but is strongest
+    in front, moderate on the sides, and weakest behind.
+    """
+    out = np.zeros((grid.L, grid.W), dtype=np.float32)
+    if defenders.empty or passer_xy is None:
+        return out
+
+    px, py = float(passer_xy[0]), float(passer_xy[1])
+    _, _, passer_l, passer_w = _sb_to_grid_point(grid, px, py)
+    passer_l = float(passer_l)
+    passer_w = float(passer_w)
+
+    gx, gy = grid.grid_mesh()
+
+    valid_defenders: List[Tuple[float, float]] = []
+    for _, row in defenders.iterrows():
+        xy = _safe_loc_xy(row.get("ff_location"))
+        if xy is None:
+            continue
+        _, _, l0, w0 = _sb_to_grid_point(grid, xy[0], xy[1])
+        valid_defenders.append((float(l0), float(w0)))
+
+    if not valid_defenders:
+        return out
+
+    for dl, dw in valid_defenders:
+        dist2 = (gx - dl) ** 2 + (gy - dw) ** 2
+        coverage = np.exp(-0.5 * dist2 / (float(sigma_dest) ** 2)).astype(np.float32)
+
+        vec_pd_l = dl - passer_l
+        vec_pd_w = dw - passer_w
+        vec_dd_l = gx - dl
+        vec_dd_w = gy - dw
+
+        norm_pd = float(np.sqrt(vec_pd_l ** 2 + vec_pd_w ** 2)) + eps
+        norm_dd = np.sqrt(vec_dd_l ** 2 + vec_dd_w ** 2) + eps
+        cos_dir = (vec_pd_l * vec_dd_l + vec_pd_w * vec_dd_w) / (norm_pd * norm_dd)
+        dir_weight = np.clip(
+            float(side_weight) + float(lambda_dir) * cos_dir,
+            float(back_weight),
+            float(front_weight),
+        ).astype(np.float32)
+
+        out += coverage * dir_weight
+
+    return out.astype(np.float32)
+
+
 def _sin_cos_between(
         ax: np.ndarray, ay: np.ndarray,
         bx: np.ndarray, by: np.ndarray,
@@ -515,14 +578,14 @@ def create_channels_for_events(
                 max_match_distance=max_match_distance,
             )
 
-        chans = create_14_channels(expanded_df, eid, grid, velocity_dict=vel)
+        chans = create_15_channels(expanded_df, eid, grid, velocity_dict=vel)
         if chans is not None:
             out.append(chans)
             valid.append(eid)
             prev_id = eid
 
     if len(out) == 0:
-        return np.zeros((0, 14, grid.L, grid.W), dtype=np.float32), []
+        return np.zeros((0, 15, grid.L, grid.W), dtype=np.float32), []
 
     return np.stack(out, axis=0), valid
 
@@ -677,6 +740,34 @@ def _build_pass_angle_channels(
     return out
 
 
+def _build_directional_pressure_channel(
+        actor: pd.Series,
+        opps: pd.DataFrame,
+        grid: GridSpec,
+        *,
+        sigma_dest: float = 4.0,
+        lambda_dir: float = 0.25,
+        side_weight: float = 1.0,
+        back_weight: float = 0.75,
+        front_weight: float = 1.25,
+) -> np.ndarray:
+    """Channel 2: dense opponent pressure field. Returns (L, W)."""
+    ball_xy = _safe_loc_xy(actor.get("event_location"))
+    if ball_xy is None:
+        return np.zeros((grid.L, grid.W), dtype=np.float32)
+
+    return build_directional_pressure_map(
+        ball_xy,
+        opps,
+        grid,
+        sigma_dest=sigma_dest,
+        lambda_dir=lambda_dir,
+        side_weight=side_weight,
+        back_weight=back_weight,
+        front_weight=front_weight,
+    )
+
+
 def create_14_channels_new(
         expanded_df: pd.DataFrame,
         event_id: str,
@@ -759,6 +850,159 @@ def create_14_channels_new(
     _, w_lo, _, _ = _sb_to_grid_point(grid, 120.0, 36.0)
     _, w_hi, _, _ = _sb_to_grid_point(grid, 120.0, 44.0)
     if chans[13, goal_l_idx, w_lo:w_hi + 1].max() == 0.0:
+        chans[1, goal_l_idx, w_lo:w_hi + 1] += 1.0
+
+    return chans
+
+
+def create_15_channels(
+        expanded_df: pd.DataFrame,
+        event_id: str,
+        grid: GridSpec = GridSpec(),
+        *,
+        velocity_dict: Optional[Dict[VelKey, Tuple[float, float]]] = None,
+        visible_area: Optional[List[float]] = None,
+        pressure_sigma_dest: float = 4.0,
+        pressure_lambda_dir: float = 0.25,
+        pressure_side_weight: float = 1.0,
+        pressure_back_weight: float = 0.75,
+        pressure_front_weight: float = 1.25,
+) -> Optional[np.ndarray]:
+    """
+    Create a (15, L, W) channel tensor for a single event.
+
+    Channel layout (0-based indices):
+      0  : teammate locations (sparse counts)
+      1  : opponent locations (sparse counts)
+      2  : opponent pressure field (dense)
+      3  : teammate vx (sparse)
+      4  : teammate vy (sparse)
+      5  : opponent vx (sparse)
+      6  : opponent vy (sparse)
+      7  : distance to ball (dense)
+      8  : distance to goal (dense)
+      9  : sin between (cell->goal) and (cell->ball) (dense)
+      10 : cos between (cell->goal) and (cell->ball) (dense)
+      11 : angle to goal in radians (dense)
+      12 : sin between pass-dir and (ball->teammate) (sparse at teammate cells)
+      13 : cos between pass-dir and (ball->teammate) (sparse at teammate cells)
+      14 : visibility mask (dense)
+    """
+    base = create_14_channels(
+        expanded_df,
+        event_id,
+        grid,
+        velocity_dict=velocity_dict,
+        visible_area=visible_area,
+    )
+    if base is None:
+        return None
+
+    ev = _get_event_slice(expanded_df, event_id)
+    if ev.empty:
+        return None
+
+    actor = _get_actor_row(ev)
+    if actor is None:
+        return None
+
+    players = _get_players(ev)
+    opps = players.loc[players["teammate"] == False] if not players.empty else pd.DataFrame()
+    pressure = _build_directional_pressure_channel(
+        actor,
+        opps,
+        grid,
+        sigma_dest=pressure_sigma_dest,
+        lambda_dir=pressure_lambda_dir,
+        side_weight=pressure_side_weight,
+        back_weight=pressure_back_weight,
+        front_weight=pressure_front_weight,
+    )
+
+    chans = np.zeros((15, grid.L, grid.W), dtype=np.float32)
+    chans[0] = base[0]
+    chans[1] = base[1]
+    chans[2] = pressure
+    chans[3:] = base[2:]
+    return chans
+
+
+def create_15_channels_new(
+        expanded_df: pd.DataFrame,
+        event_id: str,
+        grid: GridSpec = GridSpec(),
+        *,
+        velocity_dict: Optional[Dict[VelKey, Tuple[float, float]]] = None,
+        visible_area: Optional[List[float]] = None,
+        pressure_sigma_dest: float = 4.0,
+        pressure_lambda_dir: float = 0.25,
+        pressure_side_weight: float = 1.0,
+        pressure_back_weight: float = 0.75,
+        pressure_front_weight: float = 1.25,
+) -> Optional[np.ndarray]:
+    """
+    Modular version of create_15_channels.
+
+    Produces a (15, L, W) tensor with the dense opponent pressure field
+    inserted at channel 2.
+    """
+    ev = _get_event_slice(expanded_df, event_id)
+    if ev.empty:
+        return None
+
+    actor = _get_actor_row(ev)
+    if actor is None:
+        return None
+
+    ball_xy = _safe_loc_xy(actor.get("event_location"))
+    if ball_xy is None:
+        return None
+
+    if visible_area is None:
+        va = actor.get("visible_area")
+        if isinstance(va, list):
+            visible_area = va
+
+    _, _, ball_l, ball_w = _sb_to_grid_point(grid, ball_xy[0], ball_xy[1])
+    ball_lw = (float(ball_l), float(ball_w))
+    pass_dir = _ball_direction_from_pass_end(grid, ball_lw, actor.get("end_location"))
+    goal_l, goal_w = grid.goal_location()
+
+    chans = np.zeros((15, grid.L, grid.W), dtype=np.float32)
+
+    players = _get_players(ev)
+    if not players.empty:
+        mates = players.loc[players["teammate"] == True]
+        opps = players.loc[players["teammate"] == False]
+    else:
+        mates = pd.DataFrame()
+        opps = pd.DataFrame()
+
+    chans[0:2] = _build_location_channels(mates, opps, grid)
+    chans[2] = _build_directional_pressure_channel(
+        actor,
+        opps,
+        grid,
+        sigma_dest=pressure_sigma_dest,
+        lambda_dir=pressure_lambda_dir,
+        side_weight=pressure_side_weight,
+        back_weight=pressure_back_weight,
+        front_weight=pressure_front_weight,
+    )
+    chans[3:7] = _build_velocity_channels(mates, opps, grid, velocity_dict)
+    chans[12:14] = _build_pass_angle_channels(mates, grid, ball_lw, pass_dir)
+
+    gx, gy = grid.grid_mesh()
+    chans[7] = _build_distance_to_ball(gx, gy, ball_lw)
+    chans[8] = _build_distance_to_goal(gx, gy, float(goal_l), float(goal_w))
+    chans[9:11] = _build_goal_ball_sincos(gx, gy, ball_lw, float(goal_l), float(goal_w))
+    chans[11] = _build_angle_to_goal(gx, gy, float(goal_l), float(goal_w))
+    chans[14] = create_channel_visibility_mask(visible_area, grid)
+
+    goal_l_idx, _, _, _ = _sb_to_grid_point(grid, 120.0, 40.0)
+    _, w_lo, _, _ = _sb_to_grid_point(grid, 120.0, 36.0)
+    _, w_hi, _, _ = _sb_to_grid_point(grid, 120.0, 44.0)
+    if chans[14, goal_l_idx, w_lo:w_hi + 1].max() == 0.0:
         chans[1, goal_l_idx, w_lo:w_hi + 1] += 1.0
 
     return chans

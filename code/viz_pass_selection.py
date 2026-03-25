@@ -92,7 +92,7 @@ def main():
     model.eval()
 
     with torch.no_grad():
-        x = sample.channels.unsqueeze(0).to(args.device)   # (1,14,L,W)
+        x = sample.channels.unsqueeze(0).to(args.device)
         if uses_player_embed:
             player_id_mapping = ckpt.get("player_id_mapping", {})
             actor_id = player_id_mapping.get(sample.actor_player_name, 0)
