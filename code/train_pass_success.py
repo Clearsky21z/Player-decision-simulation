@@ -7,7 +7,7 @@ from typing import List, Sequence
 import torch
 from torch.utils.data import ConcatDataset, DataLoader, random_split
 
-from soccermap.context import DEFAULT_CONTEXT_DIM, context_feature_names
+from soccermap.context import context_feature_names
 from soccermap.dataset import PassDataset
 from soccermap.expand import build_expanded_dfs, build_player_id_mapping
 from soccermap.model import SoccerMapConfig, SoccerMapWithPlayerEmbed, pass_success_loss
@@ -84,7 +84,7 @@ def main():
     ap.add_argument("--val_split", type=float, default=0.15)
     ap.add_argument("--embed_team", type=str, default="Bayer Leverkusen")
     ap.add_argument("--embed_dim", type=int, default=8)
-    ap.add_argument("--context_dim", type=int, default=DEFAULT_CONTEXT_DIM)
+    ap.add_argument("--context_dim", type=int, default=0)
     ap.add_argument("--context_hidden_dim", type=int, default=16)
     ap.add_argument("--context_embed_dim", type=int, default=8)
     ap.add_argument("--out_ckpt", type=str, default="checkpoints/pass_success.pt")
