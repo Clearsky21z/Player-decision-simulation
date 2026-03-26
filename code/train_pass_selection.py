@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from typing import List, Sequence
+from typing import Any, Dict, List, Optional, Sequence
 
 import torch
 from torch.utils.data import DataLoader, ConcatDataset, random_split
@@ -43,6 +43,93 @@ def parse_id_list(s: str) -> List[str]:
     if not s:
         return []
     return [x.strip() for x in s.split(",") if x.strip()]
+
+
+def _player_started(player: Dict[str, Any]) -> bool:
+    for pos in player.get("positions", []):
+        if pos.get("start_reason") == "Starting XI":
+            return True
+    return False
+
+
+def _player_is_goalkeeper(player: Dict[str, Any]) -> bool:
+    for pos in player.get("positions", []):
+        position_name = str(pos.get("position", ""))
+        if pos.get("position_id") == 1 or "Goalkeeper" in position_name:
+            return True
+    return False
+
+
+def auto_select_players_from_lineups(
+    lineups_list: List[List[Dict[str, Any]]],
+    *,
+    team_name: str,
+    total_players: int,
+    goalkeeper_count: int,
+) -> List[str]:
+    if total_players <= 0:
+        return []
+    if goalkeeper_count < 0 or goalkeeper_count > total_players:
+        raise ValueError("goalkeeper_count must be between 0 and total_players")
+
+    player_stats: Dict[str, Dict[str, int | bool]] = {}
+    for lineups in lineups_list:
+        team_entry = next((team for team in lineups if team.get("team_name") == team_name), None)
+        if team_entry is None:
+            continue
+        seen_in_match: set[str] = set()
+        for player in team_entry.get("lineup", []):
+            name = player.get("player_name")
+            if not name:
+                continue
+
+            stats = player_stats.setdefault(
+                name,
+                {
+                    "matches": 0,
+                    "starts": 0,
+                    "goalkeeper": False,
+                },
+            )
+            if name not in seen_in_match:
+                stats["matches"] += 1
+                seen_in_match.add(name)
+            if _player_started(player):
+                stats["starts"] += 1
+            if _player_is_goalkeeper(player):
+                stats["goalkeeper"] = True
+
+    if not player_stats:
+        raise RuntimeError(f"No lineup players found for team={team_name}")
+
+    def _sort_key(item: tuple[str, Dict[str, int | bool]]) -> tuple[int, int, str]:
+        name, stats = item
+        return (-int(stats["matches"]), -int(stats["starts"]), name)
+
+    gk_candidates = sorted(
+        ((name, stats) for name, stats in player_stats.items() if bool(stats["goalkeeper"])),
+        key=_sort_key,
+    )
+    if len(gk_candidates) < goalkeeper_count:
+        raise RuntimeError(
+            f"Requested {goalkeeper_count} goalkeeper(s), but only found {len(gk_candidates)} "
+            f"for team={team_name}"
+        )
+
+    selected = [name for name, _ in gk_candidates[:goalkeeper_count]]
+    remaining_slots = total_players - len(selected)
+    outfield_candidates = sorted(
+        ((name, stats) for name, stats in player_stats.items() if not bool(stats["goalkeeper"])),
+        key=_sort_key,
+    )
+    if len(outfield_candidates) < remaining_slots:
+        raise RuntimeError(
+            f"Requested {remaining_slots} outfield player(s), but only found {len(outfield_candidates)} "
+            f"for team={team_name}"
+        )
+
+    selected.extend(name for name, _ in outfield_candidates[:remaining_slots])
+    return selected
 
 
 def _batch_to_tensors(
@@ -115,6 +202,8 @@ def main():
     ap.add_argument("--train_match_ids", type=str, default="")
 
     ap.add_argument("--holdout_match_id", type=str, default="")
+    ap.add_argument("--auto_select_players", type=int, default=0)
+    ap.add_argument("--auto_goalkeepers", type=int, default=0)
 
     ap.add_argument("--epochs", type=int, default=3)
     ap.add_argument("--batch_size", type=int, default=16)
@@ -157,7 +246,28 @@ def main():
     for mid in train_ids:
         all_lineups.append(load_lineups(args.data_root, mid))
 
-    player_id_mapping = build_player_id_mapping(all_lineups, team_name=args.embed_team)
+    selected_players: Optional[List[str]] = None
+    selected_player_filter: Optional[set[str]] = None
+    if args.auto_select_players > 0:
+        selected_players = auto_select_players_from_lineups(
+            all_lineups,
+            team_name=args.embed_team,
+            total_players=args.auto_select_players,
+            goalkeeper_count=args.auto_goalkeepers,
+        )
+        selected_player_filter = set(selected_players)
+        print(
+            "Auto-selected players "
+            f"({len(selected_players)} total, {args.auto_goalkeepers} goalkeeper(s)): "
+            + ", ".join(selected_players)
+        )
+
+    player_id_mapping = build_player_id_mapping(
+        all_lineups,
+        team_name=args.embed_team,
+    )
+    if selected_players is not None:
+        player_id_mapping = {name: i + 1 for i, name in enumerate(selected_players)}
     num_players = len(player_id_mapping)
     print(f"Player ID mapping: {num_players} unique players (team={args.embed_team})")
 
@@ -176,6 +286,7 @@ def main():
             compute_velocities=args.compute_velocities,
             only_passes=True,
             team_filter=args.embed_team,
+            actor_player_filter=selected_player_filter,
             context_dim=args.context_dim,
         )
 
@@ -277,6 +388,7 @@ def main():
             "config": SoccerMapConfig().__dict__,
             "player_id_mapping": player_id_mapping,
             "num_players": num_players,
+            "selected_players": selected_players,
             "embed_dim": args.embed_dim,
             "context_dim": args.context_dim,
             "context_hidden_dim": args.context_hidden_dim,

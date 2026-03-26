@@ -39,6 +39,7 @@ class PassDataset(Dataset):
         grid: GridSpec = GridSpec(),
         only_passes: bool = True,
         team_filter: Optional[str] = None,
+        actor_player_filter: Optional[set[str]] = None,
         compute_velocities: bool = False,
         max_time_gap: float = 5.0,
         max_match_distance: float = 15.0,
@@ -61,6 +62,8 @@ class PassDataset(Dataset):
             actor = actor[actor["event_type"] == "Pass"]
         if team_filter:
             actor = actor[actor["team"] == team_filter]
+        if actor_player_filter:
+            actor = actor[actor["player_name"].isin(actor_player_filter)]
 
         # must have end_location
         actor = actor[actor["end_location"].notna()]

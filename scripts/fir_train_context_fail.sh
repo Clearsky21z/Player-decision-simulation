@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --account=def-vianeylb
+#SBATCH --account=def-vianeylb_gpu
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
@@ -7,8 +7,10 @@
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
 
-cd $SCRATCH/Player-decision-simulation || exit 1
-source ~/myenv/bin/activate
+set -euo pipefail
+
+cd "$SCRATCH/Player-decision-simulation" || exit 1
+source "$HOME/myenv/bin/activate"
 
 python code/train_pass_selection.py \
     --data_root data/leverkusen_data \
@@ -22,4 +24,5 @@ python code/train_pass_selection.py \
     --embed_team "Bayer Leverkusen" \
     --auto_select_players 6 \
     --auto_goalkeepers 1 \
-    --out_ckpt checkpoints/testing.pt
+    --loss ce \
+    --out_ckpt checkpoints/fir_context_fail_testing.pt
