@@ -200,6 +200,7 @@ def main():
     ap.add_argument("--match_id", type=str, default="")
 
     ap.add_argument("--train_match_ids", type=str, default="")
+    ap.add_argument("--selection_match_ids", type=str, default="")
 
     ap.add_argument("--holdout_match_id", type=str, default="")
     ap.add_argument("--auto_select_players", type=int, default=0)
@@ -223,6 +224,7 @@ def main():
     args = ap.parse_args()
 
     train_ids = parse_id_list(args.train_match_ids)
+    selection_ids = parse_id_list(args.selection_match_ids)
 
     if not train_ids:
         if args.match_id.strip():
@@ -241,33 +243,36 @@ def main():
     if holdout:
         print(f"Holding out match_id={holdout} (NOT used in training)")
 
-    # --- collect lineups and build player ID mapping ---
-    all_lineups = []
+    # --- collect training lineups ---
+    train_lineups = []
     for mid in train_ids:
-        all_lineups.append(load_lineups(args.data_root, mid))
+        train_lineups.append(load_lineups(args.data_root, mid))
+
+    # --- collect selection lineups for visualization-friendly player subset ---
+    selection_ids = selection_ids or train_ids
+    selection_lineups = []
+    for mid in selection_ids:
+        selection_lineups.append(load_lineups(args.data_root, mid))
 
     selected_players: Optional[List[str]] = None
-    selected_player_filter: Optional[set[str]] = None
     if args.auto_select_players > 0:
         selected_players = auto_select_players_from_lineups(
-            all_lineups,
+            selection_lineups,
             team_name=args.embed_team,
             total_players=args.auto_select_players,
             goalkeeper_count=args.auto_goalkeepers,
         )
-        selected_player_filter = set(selected_players)
         print(
             "Auto-selected players "
-            f"({len(selected_players)} total, {args.auto_goalkeepers} goalkeeper(s)): "
+            f"({len(selected_players)} total, {args.auto_goalkeepers} goalkeeper(s)) "
+            f"from selection matches {selection_ids}: "
             + ", ".join(selected_players)
         )
 
     player_id_mapping = build_player_id_mapping(
-        all_lineups,
+        train_lineups,
         team_name=args.embed_team,
     )
-    if selected_players is not None:
-        player_id_mapping = {name: i + 1 for i, name in enumerate(selected_players)}
     num_players = len(player_id_mapping)
     print(f"Player ID mapping: {num_players} unique players (team={args.embed_team})")
 
@@ -286,7 +291,6 @@ def main():
             compute_velocities=args.compute_velocities,
             only_passes=True,
             team_filter=args.embed_team,
-            actor_player_filter=selected_player_filter,
             context_dim=args.context_dim,
         )
 
@@ -384,6 +388,7 @@ def main():
             "model_type": "soccermap_player_conditioned",
             "conditioning": "input_concat+film",
             "train_match_ids": train_ids,
+            "selection_match_ids": selection_ids,
             "holdout_match_id": holdout,
             "config": SoccerMapConfig().__dict__,
             "player_id_mapping": player_id_mapping,
