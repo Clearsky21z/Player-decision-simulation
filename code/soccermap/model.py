@@ -178,19 +178,20 @@ class SoccerMapWithPlayerEmbed(nn.Module):
     """
 
     def __init__(
-        self,
-        num_players: int,
-        embed_dim: int = 8,
-        context_dim: int = 0,
-        context_hidden_dim: int = 16,
-        context_embed_dim: int = 8,
-        cfg: SoccerMapConfig = SoccerMapConfig(),
+            self,
+            num_players: int,
+            embed_dim: int = 8,
+            context_dim: int = 0,
+            context_hidden_dim: int = 16,
+            context_embed_dim: int = 8,
+            cfg: SoccerMapConfig = SoccerMapConfig(),
     ):
         super().__init__()
         self.cfg = cfg
         self.embed_dim = embed_dim
-        self.context_dim = context_dim
-        self.context_embed_dim = context_embed_dim if context_dim > 0 else 0
+
+        # self.context_dim = context_dim
+        # self.context_embed_dim = context_embed_dim if context_dim > 0 else 0
 
         # Player embedding table (index 0 = unknown / padding)
         self.player_embedding = nn.Embedding(
@@ -199,16 +200,16 @@ class SoccerMapWithPlayerEmbed(nn.Module):
             padding_idx=0,
         )
 
-        self.context_ffn: Optional[nn.Sequential]
-        if self.context_dim > 0:
-            self.context_ffn = nn.Sequential(
-                nn.Linear(context_dim, context_hidden_dim),
-                nn.ReLU(),
-                nn.Linear(context_hidden_dim, self.context_embed_dim),
-                nn.ReLU(),
-            )
-        else:
-            self.context_ffn = None
+        # self.context_ffn: Optional[nn.Sequential]
+        # if self.context_dim > 0:
+        #     self.context_ffn = nn.Sequential(
+        #         nn.Linear(context_dim, context_hidden_dim),
+        #         nn.ReLU(),
+        #         nn.Linear(context_hidden_dim, self.context_embed_dim),
+        #         nn.ReLU(),
+        #     )
+        # else:
+        #     self.context_ffn = None
 
         # --- Backbone ---
         # Condition the model early by concatenating the player embedding to
@@ -232,7 +233,9 @@ class SoccerMapWithPlayerEmbed(nn.Module):
         self.fuse123 = FusePair()
 
         # --- Late fusion head for identity + compact game context ---
-        self.embed_head = nn.Conv2d(1 + embed_dim + self.context_embed_dim, 1, kernel_size=1)
+        # self.embed_head = nn.Conv2d(1 + embed_dim + self.context_embed_dim, 1, kernel_size=1)
+        self.embed_head = nn.Conv2d(1 + embed_dim, 1, kernel_size=1)
+
         # FiLM layers modulate intermediate feature maps using the player
         # embedding so different actors can alter the spatial representation.
         self.film1 = nn.Linear(embed_dim, 2 * cfg.feat_channels)
@@ -245,17 +248,16 @@ class SoccerMapWithPlayerEmbed(nn.Module):
         nn.init.zeros_(self.film3.weight)
         nn.init.zeros_(self.film3.bias)
 
-
     def _apply_film(self, h: torch.Tensor, embed: torch.Tensor, film: nn.Linear) -> torch.Tensor:
         gamma_beta = film(embed)
         gamma, beta = torch.chunk(gamma_beta, 2, dim=1)
         return h * (1.0 + gamma[:, :, None, None]) + beta[:, :, None, None]
 
     def forward(
-        self,
-        x: torch.Tensor,
-        actor_ids: torch.Tensor,
-        context: Optional[torch.Tensor] = None,
+            self,
+            x: torch.Tensor,
+            actor_ids: torch.Tensor,
+            context: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         """
         Parameters
@@ -297,27 +299,25 @@ class SoccerMapWithPlayerEmbed(nn.Module):
         embed_spatial = embed[:, :, None, None].expand(N, self.embed_dim, H, W)  # (N, D, H, W)
         fusion_parts = [p123, embed_spatial]
 
-        if self.context_ffn is not None:
-            if context is None:
-                context = torch.zeros(
-                    (N, self.context_dim),
-                    dtype=x.dtype,
-                    device=x.device,
-                )
-            elif context.shape != (N, self.context_dim):
-                raise ValueError(
-                    f"context must have shape {(N, self.context_dim)}, got {tuple(context.shape)}"
-                )
-            context_embed = self.context_ffn(context)
-            context_spatial = context_embed[:, :, None, None].expand(N, self.context_embed_dim, H, W)
-            fusion_parts.append(context_spatial)
+        # if self.context_ffn is not None:
+        #     if context is None:
+        #         context = torch.zeros(
+        #             (N, self.context_dim),
+        #             dtype=x.dtype,
+        #             device=x.device,
+        #         )
+        #     elif context.shape != (N, self.context_dim):
+        #         raise ValueError(
+        #             f"context must have shape {(N, self.context_dim)}, got {tuple(context.shape)}"
+        #         )
+        #     context_embed = self.context_ffn(context)
+        #     context_spatial = context_embed[:, :, None, None].expand(N, self.context_embed_dim, H, W)
+        #     fusion_parts.append(context_spatial)
 
         fused = torch.cat(fusion_parts, dim=1)
-        logits = self.embed_head(fused)                        # (N, 1, H, W)
-        # --- END LATE FUSION ---
+        logits = self.embed_head(fused)  # (N, 1, H, W)
 
         return logits
-
 
 # -------- Losses / surfaces --------
 
@@ -448,4 +448,3 @@ def pass_selection_surface(logits: torch.Tensor) -> torch.Tensor:
     N, _, H, W = logits.shape
     flat = logits.view(N, -1)
     return torch.softmax(flat, dim=1).view(N, H, W)  # sums to 1
-
