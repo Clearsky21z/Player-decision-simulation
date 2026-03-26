@@ -33,15 +33,13 @@ CONTEXT_NAMES = [
     "phase_mid",
     "phase_late",
     "phase_extra",
-    "pass_completed",
 ]
 
 CONTEXT_GROUPS = [
     ("score_block", [0, 1, 2]),
     ("match_time", [3]),
     ("phase_block", [4, 5, 6, 7]),
-    ("pass_completed", [8]),
-    ("all_context", list(range(9))),
+    ("all_context", list(range(8))),
 ]
 
 
