@@ -30,6 +30,7 @@ def main():
     ap.add_argument("--device", type=str, default="cpu")
     ap.add_argument("--compute_velocities", action="store_true")
     ap.add_argument("--swap_player", type=str, default="")
+    ap.add_argument("--team_filter", type=str, default="Bayer Leverkusen")
 
     # NEW
     ap.add_argument("--scale", type=str, default="log", choices=["log", "percentile", "linear"])
@@ -38,6 +39,7 @@ def main():
     ap.add_argument("--cmap", type=str, default="RdBu_r")
 
     args = ap.parse_args()
+    out_path = Path(args.out)
 
     events = load_events(args.data_root, args.match_id)
     threesixty = load_threesixty(args.data_root, args.match_id)
@@ -51,15 +53,13 @@ def main():
         m.expanded_df,
         compute_velocities=args.compute_velocities,
         only_passes=True,
+        team_filter=args.team_filter,
         context_dim=dataset_context_dim,
     )
-    sample = ds[args.sample_idx]
 
     cfg_kwargs = ckpt.get("config", {})
     cfg = SoccerMapConfig(**cfg_kwargs) if cfg_kwargs else SoccerMapConfig()
     uses_player_embed = any(k.startswith("player_embedding.") for k in state.keys())
-    conditioning = ckpt.get("conditioning", "")
-    player_id_mapping = ckpt.get("player_id_mapping", {})
 
     if uses_player_embed:
         model = SoccerMapWithPlayerEmbed(
@@ -70,53 +70,51 @@ def main():
             context_embed_dim=ckpt.get("context_embed_dim", 8),
             cfg=cfg,
         ).to(args.device)
-    else:
-        model = SoccerMap(cfg).to(args.device)
-
-    model.load_state_dict(state)
-    model.eval()
-
-    with torch.no_grad():
-        x = sample.channels.unsqueeze(0).to(args.device)
-        if uses_player_embed:
-            player_id_mapping = ckpt.get("player_id_mapping", {})
-            actor_id = player_id_mapping.get(sample.actor_player_name, 0)
-            actor_ids = torch.tensor([actor_id], dtype=torch.long, device=args.device)
-            context = sample.context_features.unsqueeze(0).to(args.device)
-            logits = model(x, actor_ids, context)          # (1,1,L,W)
-        else:
-            logits = model(x)                              # (1,1,L,W)
-
-        # Softmax over all cells (selection distribution)
-        flat = logits.view(1, -1)
-        prob_flat = torch.softmax(flat, dim=1)[0]           # (L*W,)
-        p_dest = float(prob_flat[sample.dest_index].cpu().item())
-
-        L = logits.shape[2]
-        W = logits.shape[3]
-        prob_LW = prob_flat.view(L, W).cpu().numpy()
-
-    if conditioning == "input_concat+film":
-        title = (
-            f"Sample idx={args.sample_idx} | actor={args.swap_player.strip() or sample.actor_player_name} | "
-            f"p(dest cell)={p_dest:.6f} | true complete={sample.completed}"
+        model.load_state_dict(state)
+        model.eval()
+        plot_pass_selection_embed(
+            model,
+            ds,
+            m.expanded_df,
+            ckpt.get("player_id_mapping", {}),
+            sample_idx=args.sample_idx,
+            swap_player=args.swap_player.strip() or None,
+            out_path=str(out_path),
+            show=False,
         )
     else:
-        title = f"Sample idx={args.sample_idx} | p(dest cell)={p_dest:.6f} | true complete={sample.completed}"
+        sample_idx = args.sample_idx
+        sample = ds[sample_idx]
+        model = SoccerMap(cfg).to(args.device)
+        model.load_state_dict(state)
+        model.eval()
 
-    out_path = Path(args.out)
-    plot_pass_selection_surface(
-        prob_LW,
-        m.expanded_df,
-        sample.event_id,
-        title=title,
-        out_path=str(out_path),
-        show=False,
-        scale=args.scale,
-        q=args.q,
-        eps=args.eps,
-        cmap=args.cmap,
-    )
+        with torch.no_grad():
+            x = sample.channels.unsqueeze(0).to(args.device)
+            logits = model(x)
+
+            flat = logits.view(1, -1)
+            prob_flat = torch.softmax(flat, dim=1)[0]
+            p_dest = float(prob_flat[sample.dest_index].cpu().item())
+
+            L = logits.shape[2]
+            W = logits.shape[3]
+            prob_LW = prob_flat.view(L, W).cpu().numpy()
+
+        title = f"Sample idx={sample_idx} | p(dest cell)={p_dest:.6f} | true complete={sample.completed}"
+
+        plot_pass_selection_surface(
+            prob_LW,
+            m.expanded_df,
+            sample.event_id,
+            title=title,
+            out_path=str(out_path),
+            show=False,
+            scale=args.scale,
+            q=args.q,
+            eps=args.eps,
+            cmap=args.cmap,
+        )
     print(f"saved visualization -> {out_path}")
 
 
