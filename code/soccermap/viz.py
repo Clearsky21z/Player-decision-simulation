@@ -181,6 +181,78 @@ def plot_pass_selection_surface(
     return fig
 
 
+def plot_pass_selection_difference_surface(
+        diff_LW: np.ndarray,
+        expanded_df: pd.DataFrame,
+        event_id: str,
+        *,
+        title: str = "",
+        out_path: Optional[str] = None,
+        show: bool = False,
+        cmap: str = "RdBu_r",
+        alpha: float = 0.92,
+        q: float = 0.995,
+        interpolation: str = "nearest",
+) -> plt.Figure:
+    """
+    Difference between two pass-selection surfaces on the same event.
+
+    Positive values mean the first player/model assigns more probability mass
+    to that cell; negative values mean the second player/model does.
+    """
+    passer_xy, dest_xy, completed, atk_xy, dfn_xy = _extract_scene(expanded_df, event_id)
+
+    pitch = _make_pitch()
+    fig, ax = pitch.draw(figsize=(11, 7))
+
+    img = _to_img_yx(diff_LW)
+    vmax = float(np.quantile(np.abs(img), q))
+    vmax = max(vmax, 1e-12)
+    norm = mcolors.TwoSlopeNorm(vmin=-vmax, vcenter=0.0, vmax=vmax)
+
+    im = ax.imshow(
+        img,
+        extent=pitch.extent,
+        origin="upper",
+        aspect="auto",
+        cmap=cmap,
+        norm=norm,
+        alpha=alpha,
+        interpolation=interpolation,
+    )
+    cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cb.ax.tick_params(labelsize=9)
+
+    if atk_xy.size:
+        pitch.scatter(atk_xy[:, 0], atk_xy[:, 1], s=70, ax=ax, label="Attacking")
+    if dfn_xy.size:
+        pitch.scatter(dfn_xy[:, 0], dfn_xy[:, 1], s=70, ax=ax, label="Defending")
+
+    if passer_xy is not None:
+        pitch.scatter([passer_xy[0]], [passer_xy[1]], s=120, ax=ax, label="Passer position")
+    if dest_xy is not None:
+        pitch.scatter([dest_xy[0]], [dest_xy[1]], s=140, marker="x", ax=ax, label="True destination")
+    if passer_xy is not None and dest_xy is not None:
+        pitch.arrows(
+            passer_xy[0], passer_xy[1],
+            dest_xy[0], dest_xy[1],
+            ax=ax,
+            width=2,
+            headwidth=6,
+            headlength=6,
+            headaxislength=5,
+            color="black",
+        )
+
+    if not title:
+        title = f"event_id={event_id} | completed={completed}"
+    ax.set_title(title)
+    ax.legend(loc="upper left")
+
+    _save_or_show(fig, out_path, show)
+    return fig
+
+
 def plot_pass_success_surface(
         prob_LW: np.ndarray,          # (L,W) success probs in [0,1]
         expanded_df: pd.DataFrame,

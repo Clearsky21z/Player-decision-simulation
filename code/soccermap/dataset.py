@@ -8,7 +8,7 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
-from .channels import create_15_channels, compute_player_velocities
+from .channels import create_11_channels
 from .config import GridSpec
 from .context import DEFAULT_CONTEXT_DIM, build_context_features
 
@@ -16,7 +16,7 @@ from .context import DEFAULT_CONTEXT_DIM, build_context_features
 @dataclass(frozen=True)
 class PassSample:
     event_id: str
-    channels: torch.Tensor         # (15,L,W)
+    channels: torch.Tensor         # (11,L,W)
     context_features: torch.Tensor # (context_dim,)
     dest_index: int                # for selection model (flattened index)
     completed: Optional[int]       # 0/1 for success model
@@ -89,19 +89,13 @@ class PassDataset(Dataset):
         eid = str(row["event_id"])
 
         # compute velocities using previous pass event (or previous event with 360 if you prefer)
-        vel = None
-        if self.compute_velocities and idx > 0:
-            prev_eid = str(self.actor_events.iloc[idx - 1]["event_id"])
-            vel = compute_player_velocities(
-                self.expanded_df, eid, previous_event_id=prev_eid,
-                max_time_gap=self.max_time_gap,
-                max_match_distance=self.max_match_distance,
-            )
-
-        chans = create_15_channels(self.expanded_df, eid, self.grid, velocity_dict=vel)
+        # Velocity channels have been removed from the active model variant.
+        # Keep ``compute_velocities`` in the Dataset API for compatibility, but
+        # the emitted channel tensor is now the 11-channel no-velocity version.
+        chans = create_11_channels(self.expanded_df, eid, self.grid)
         if chans is None:
             # fallback: return a zero sample (rare), but keep deterministic
-            chans = np.zeros((15, self.grid.L, self.grid.W), dtype=np.float32)
+            chans = np.zeros((11, self.grid.L, self.grid.W), dtype=np.float32)
 
         # destination index
         end_loc = row["end_location"]

@@ -60,6 +60,11 @@ def _batch_to_tensors(
     return channels, dest, actor_ids
 
 
+def _infer_input_channels(ds) -> int:
+    sample = ds[0]
+    return int(sample.channels.shape[0])
+
+
 def _embedding_norm_summary(model: SoccerMapWithPlayerEmbed) -> tuple[float, float]:
     weights = model.player_embedding.weight.detach()[1:]
     if weights.numel() == 0:
@@ -186,6 +191,13 @@ def main():
     full_ds = ConcatDataset(ds_list)
     print(f"Total samples: {len(full_ds)} (sum={total_passes})")
 
+    input_channels = _infer_input_channels(full_ds)
+    if input_channels != SoccerMapConfig().in_channels:
+        raise RuntimeError(
+            f"Dataset produces {input_channels} channels but SoccerMapConfig expects "
+            f"{SoccerMapConfig().in_channels}. Update the config or channel builder before training."
+        )
+
     # --- train / val split ---
     n_total = len(full_ds)
     n_val = max(1, int(n_total * args.val_split))
@@ -204,10 +216,14 @@ def main():
         context_dim=args.context_dim,
         context_hidden_dim=args.context_hidden_dim,
         context_embed_dim=args.context_embed_dim,
+        late_fusion=False,
         cfg=SoccerMapConfig(),
     ).to(args.device)
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
-    print(f"Model conditioning: input_concat+film | loss: {args.loss}")
+    print(
+        f"Model conditioning: input_concat+film | late_fusion=off | loss: {args.loss} | "
+        f"input_channels={input_channels} | context_dim={args.context_dim}"
+    )
 
     def _compute_loss(logits, dest, channels):
         if args.loss == "kl":
@@ -272,9 +288,12 @@ def main():
             "model_state": model.state_dict(),
             "model_type": "soccermap_player_conditioned",
             "conditioning": "input_concat+film",
+            "late_fusion": False,
+            "loss": args.loss,
             "train_match_ids": train_ids,
             "holdout_match_id": holdout,
             "config": SoccerMapConfig().__dict__,
+            "input_channels": input_channels,
             "player_id_mapping": player_id_mapping,
             "num_players": num_players,
             "embed_dim": args.embed_dim,

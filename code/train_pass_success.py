@@ -161,11 +161,12 @@ def main():
         context_dim=args.context_dim,
         context_hidden_dim=args.context_hidden_dim,
         context_embed_dim=args.context_embed_dim,
+        late_fusion=True,
         cfg=SoccerMapConfig(),
     ).to(args.device)
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
     print(
-        f"Model conditioning: input_concat+film | task: pass_success | "
+        f"Model conditioning: input_concat+film | late_fusion=on | task: pass_success | "
         f"input_channels={input_channels} | device={args.device}"
     )
 
@@ -226,6 +227,7 @@ def main():
             "model_type": "soccermap_player_conditioned",
             "task": "pass_success",
             "conditioning": "input_concat+film",
+            "late_fusion": True,
             "train_match_ids": train_ids,
             "holdout_match_id": holdout,
             "config": SoccerMapConfig().__dict__,

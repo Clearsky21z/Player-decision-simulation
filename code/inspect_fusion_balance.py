@@ -51,6 +51,7 @@ def build_model_from_ckpt(
             context_dim=ckpt.get("context_dim", 0),
             context_hidden_dim=ckpt.get("context_hidden_dim", 16),
             context_embed_dim=ckpt.get("context_embed_dim", 8),
+            late_fusion=ckpt.get("late_fusion", True),
             cfg=cfg,
         ).to(device)
     else:
@@ -165,8 +166,12 @@ def inspect_direct_weights(model: torch.nn.Module) -> List[str]:
         lines.append("Checkpoint has no player/context branch; only spatial CNN is present.")
         return lines
 
-    lines.append("Direct learned weights")
-    lines.append("- late fusion head (`embed_head`) mixes final CNN logit map + embedding dims + context dims")
+    if not model.late_fusion:
+        lines.append("Direct learned weights")
+        lines.append("- late fusion head is disabled for this checkpoint; selection uses only early concat + FiLM")
+    else:
+        lines.append("Direct learned weights")
+        lines.append("- late fusion head (`embed_head`) mixes final CNN logit map + embedding dims + context dims")
 
     with torch.no_grad():
         late_w = model.embed_head.weight.detach().view(-1)
@@ -396,7 +401,11 @@ def inspect_ablation_effects(
     lines.append("Interpretation")
     lines.append("- bigger positive loss delta means that branch mattered more for correct predictions")
     lines.append("- bigger surface_l1 means removing that branch changed the predicted map more")
-    lines.append("- `embed_head` weights alone are not enough because embedding also enters early via concat + FiLM")
+    if model.late_fusion:
+        lines.append("- `embed_head` weights alone are not enough because embedding also enters early via concat + FiLM")
+        lines.append("- for pass-selection, the late broadcast embedding can only add a constant logit offset across the pitch")
+    else:
+        lines.append("- this checkpoint already bypasses late fusion, so player effects come only from early concat + FiLM")
     return lines
 
 

@@ -15,7 +15,7 @@ class SoccerMapConfig:
     """
     Matches the paper's described components.
     """
-    in_channels: int = 15
+    in_channels: int = 11
 
     feat_channels: int = 32
 
@@ -175,7 +175,10 @@ class SoccerMap(nn.Module):
 
 class SoccerMapWithPlayerEmbed(nn.Module):
     """
-    SoccerMap with FiLM-conditioned spatial features and late-fused game context.
+    SoccerMap with early player embedding concat, FiLM modulation, and an
+    optional late context branch.
+
+    Current no-context experiments should pass ``context_dim=0``.
     """
 
     def __init__(
@@ -185,14 +188,15 @@ class SoccerMapWithPlayerEmbed(nn.Module):
             context_dim: int = 0,
             context_hidden_dim: int = 16,
             context_embed_dim: int = 8,
+            late_fusion: bool = True,
             cfg: SoccerMapConfig = SoccerMapConfig(),
     ):
         super().__init__()
         self.cfg = cfg
         self.embed_dim = embed_dim
-
-        # self.context_dim = context_dim
-        # self.context_embed_dim = context_embed_dim if context_dim > 0 else 0
+        self.context_dim = context_dim
+        self.context_embed_dim = context_embed_dim if context_dim > 0 else 0
+        self.late_fusion = late_fusion
 
         # Player embedding table (index 0 = unknown / padding)
         self.player_embedding = nn.Embedding(
@@ -201,16 +205,16 @@ class SoccerMapWithPlayerEmbed(nn.Module):
             padding_idx=0,
         )
 
-        # self.context_ffn: Optional[nn.Sequential]
-        # if self.context_dim > 0:
-        #     self.context_ffn = nn.Sequential(
-        #         nn.Linear(context_dim, context_hidden_dim),
-        #         nn.ReLU(),
-        #         nn.Linear(context_hidden_dim, self.context_embed_dim),
-        #         nn.ReLU(),
-        #     )
-        # else:
-        #     self.context_ffn = None
+        self.context_ffn: Optional[nn.Sequential]
+        if self.context_dim > 0:
+            self.context_ffn = nn.Sequential(
+                nn.Linear(context_dim, context_hidden_dim),
+                nn.ReLU(),
+                nn.Linear(context_hidden_dim, self.context_embed_dim),
+                nn.ReLU(),
+            )
+        else:
+            self.context_ffn = None
 
         # --- Backbone ---
         # Condition the model early by concatenating the player embedding to
@@ -234,8 +238,11 @@ class SoccerMapWithPlayerEmbed(nn.Module):
         self.fuse123 = FusePair()
 
         # --- Late fusion head for identity + compact game context ---
-        # self.embed_head = nn.Conv2d(1 + embed_dim + self.context_embed_dim, 1, kernel_size=1)
-        self.embed_head = nn.Conv2d(1 + embed_dim, 1, kernel_size=1)
+        # Keep the layer allocated for checkpoint compatibility, but allow
+        # callers to bypass it for pass-selection runs. A broadcast player
+        # vector added after the final spatial logit map only contributes a
+        # constant offset across the pitch, which softmax cancels out.
+        self.embed_head = nn.Conv2d(1 + embed_dim + self.context_embed_dim, 1, kernel_size=1)
 
         # FiLM layers modulate intermediate feature maps using the player
         # embedding so different actors can alter the spatial representation.
@@ -263,7 +270,7 @@ class SoccerMapWithPlayerEmbed(nn.Module):
         """
         Parameters
         ----------
-        x : (N, 14, H, W) channel tensor
+        x : (N, 11, H, W) channel tensor
         actor_ids : (N,) long tensor of player embedding indices
         context : (N, context_dim) dense match-context features
 
@@ -295,25 +302,28 @@ class SoccerMapWithPlayerEmbed(nn.Module):
         p23_up = self.up23_to_1(p23)
         p123 = self.fuse123(p1, p23_up)  # (N, 1, H, W)
 
+        if not self.late_fusion:
+            return p123
+
         # --- LATE FUSION ---
         # Reuse embed from early fusion; broadcast spatially for concat.
         embed_spatial = embed[:, :, None, None].expand(N, self.embed_dim, H, W)  # (N, D, H, W)
         fusion_parts = [p123, embed_spatial]
 
-        # if self.context_ffn is not None:
-        #     if context is None:
-        #         context = torch.zeros(
-        #             (N, self.context_dim),
-        #             dtype=x.dtype,
-        #             device=x.device,
-        #         )
-        #     elif context.shape != (N, self.context_dim):
-        #         raise ValueError(
-        #             f"context must have shape {(N, self.context_dim)}, got {tuple(context.shape)}"
-        #         )
-        #     context_embed = self.context_ffn(context)
-        #     context_spatial = context_embed[:, :, None, None].expand(N, self.context_embed_dim, H, W)
-        #     fusion_parts.append(context_spatial)
+        if self.context_ffn is not None:
+            if context is None:
+                context = torch.zeros(
+                    (N, self.context_dim),
+                    dtype=x.dtype,
+                    device=x.device,
+                )
+            elif context.shape != (N, self.context_dim):
+                raise ValueError(
+                    f"context must have shape {(N, self.context_dim)}, got {tuple(context.shape)}"
+                )
+            context_embed = self.context_ffn(context)
+            context_spatial = context_embed[:, :, None, None].expand(N, self.context_embed_dim, H, W)
+            fusion_parts.append(context_spatial)
 
         fused = torch.cat(fusion_parts, dim=1)
         logits = self.embed_head(fused)  # (N, 1, H, W)

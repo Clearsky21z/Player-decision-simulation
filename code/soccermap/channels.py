@@ -578,14 +578,14 @@ def create_channels_for_events(
                 max_match_distance=max_match_distance,
             )
 
-        chans = create_15_channels(expanded_df, eid, grid, velocity_dict=vel)
+        chans = create_11_channels(expanded_df, eid, grid)
         if chans is not None:
             out.append(chans)
             valid.append(eid)
             prev_id = eid
 
     if len(out) == 0:
-        return np.zeros((0, 15, grid.L, grid.W), dtype=np.float32), []
+        return np.zeros((0, 11, grid.L, grid.W), dtype=np.float32), []
 
     return np.stack(out, axis=0), valid
 
@@ -924,6 +924,95 @@ def create_15_channels(
     chans[1] = base[1]
     chans[2] = pressure
     chans[3:] = base[2:]
+    return chans
+
+
+def create_11_channels(
+        expanded_df: pd.DataFrame,
+        event_id: str,
+        grid: GridSpec = GridSpec(),
+        *,
+        visible_area: Optional[List[float]] = None,
+        pressure_sigma_dest: float = 4.0,
+        pressure_lambda_dir: float = 0.25,
+        pressure_side_weight: float = 1.0,
+        pressure_back_weight: float = 0.75,
+        pressure_front_weight: float = 1.25,
+) -> Optional[np.ndarray]:
+    """
+    Create an (11, L, W) channel tensor with the four velocity channels removed.
+
+    Channel layout (0-based indices):
+      0  : teammate locations (sparse counts)
+      1  : opponent locations (sparse counts)
+      2  : opponent pressure field (dense)
+      3  : distance to ball (dense)
+      4  : distance to goal (dense)
+      5  : sin between (cell->goal) and (cell->ball) (dense)
+      6  : cos between (cell->goal) and (cell->ball) (dense)
+      7  : angle to goal in radians (dense)
+      8  : sin between pass-dir and (ball->teammate) (sparse at teammate cells)
+      9  : cos between pass-dir and (ball->teammate) (sparse at teammate cells)
+      10 : visibility mask (dense)
+    """
+    ev = _get_event_slice(expanded_df, event_id)
+    if ev.empty:
+        return None
+
+    actor = _get_actor_row(ev)
+    if actor is None:
+        return None
+
+    ball_xy = _safe_loc_xy(actor.get("event_location"))
+    if ball_xy is None:
+        return None
+
+    if visible_area is None:
+        va = actor.get("visible_area")
+        if isinstance(va, list):
+            visible_area = va
+
+    _, _, ball_l, ball_w = _sb_to_grid_point(grid, ball_xy[0], ball_xy[1])
+    ball_lw = (float(ball_l), float(ball_w))
+    pass_dir = _ball_direction_from_pass_end(grid, ball_lw, actor.get("end_location"))
+    goal_l, goal_w = grid.goal_location()
+
+    chans = np.zeros((11, grid.L, grid.W), dtype=np.float32)
+
+    players = _get_players(ev)
+    if not players.empty:
+        mates = players.loc[players["teammate"] == True]
+        opps = players.loc[players["teammate"] == False]
+    else:
+        mates = pd.DataFrame()
+        opps = pd.DataFrame()
+
+    chans[0:2] = _build_location_channels(mates, opps, grid)
+    chans[2] = _build_directional_pressure_channel(
+        actor,
+        opps,
+        grid,
+        sigma_dest=pressure_sigma_dest,
+        lambda_dir=pressure_lambda_dir,
+        side_weight=pressure_side_weight,
+        back_weight=pressure_back_weight,
+        front_weight=pressure_front_weight,
+    )
+    chans[8:10] = _build_pass_angle_channels(mates, grid, ball_lw, pass_dir)
+
+    gx, gy = grid.grid_mesh()
+    chans[3] = _build_distance_to_ball(gx, gy, ball_lw)
+    chans[4] = _build_distance_to_goal(gx, gy, float(goal_l), float(goal_w))
+    chans[5:7] = _build_goal_ball_sincos(gx, gy, ball_lw, float(goal_l), float(goal_w))
+    chans[7] = _build_angle_to_goal(gx, gy, float(goal_l), float(goal_w))
+    chans[10] = create_channel_visibility_mask(visible_area, grid)
+
+    goal_l_idx, _, _, _ = _sb_to_grid_point(grid, 120.0, 40.0)
+    _, w_lo, _, _ = _sb_to_grid_point(grid, 120.0, 36.0)
+    _, w_hi, _, _ = _sb_to_grid_point(grid, 120.0, 44.0)
+    if chans[10, goal_l_idx, w_lo:w_hi + 1].max() == 0.0:
+        chans[1, goal_l_idx, w_lo:w_hi + 1] += 1.0
+
     return chans
 
 

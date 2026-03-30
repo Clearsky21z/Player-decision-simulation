@@ -77,6 +77,7 @@ def build_model_from_ckpt(ckpt: Dict, device: str) -> Tuple[torch.nn.Module, boo
             context_dim=ckpt.get("context_dim", 0),
             context_hidden_dim=ckpt.get("context_hidden_dim", 16),
             context_embed_dim=ckpt.get("context_embed_dim", 8),
+            late_fusion=ckpt.get("late_fusion", True),
             cfg=cfg,
         ).to(device)
     else:
