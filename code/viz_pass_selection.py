@@ -100,6 +100,7 @@ def main():
             L = logits.shape[2]
             W = logits.shape[3]
             prob_LW = prob_flat.view(L, W).cpu().numpy()
+            vis_mask = sample.channels[13].cpu().numpy()
 
         title = f"Sample idx={sample_idx} | p(dest cell)={p_dest:.6f} | true complete={sample.completed}"
 
@@ -107,6 +108,7 @@ def main():
             prob_LW,
             m.expanded_df,
             sample.event_id,
+            vis_mask=vis_mask,
             title=title,
             out_path=str(out_path),
             show=False,

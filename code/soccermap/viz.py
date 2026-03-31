@@ -82,6 +82,7 @@ def plot_pass_selection_surface(
         expanded_df: pd.DataFrame,
         event_id: str,
         *,
+        vis_mask: Optional[np.ndarray] = None,
         title: str = "",
         out_path: Optional[str] = None,
         show: bool = False,
@@ -148,6 +149,17 @@ def plot_pass_selection_surface(
 
     cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
     cb.ax.tick_params(labelsize=9)
+
+    if vis_mask is not None:
+        vis_img = _to_img_yx(vis_mask)
+        ax.contour(
+            vis_img,
+            levels=[0.5],
+            colors="lime",
+            linewidths=2,
+            extent=pitch.extent,
+            origin="upper",
+        )
 
     # players
     if atk_xy.size:
