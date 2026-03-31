@@ -63,6 +63,30 @@ def _extract_scene(expanded_df: pd.DataFrame, event_id: str):
     return passer_xy, dest_xy, completed, atk_xy, dfn_xy
 
 
+def _extract_visible_area(expanded_df: pd.DataFrame, event_id: str) -> Optional[np.ndarray]:
+    ev = expanded_df.loc[expanded_df["event_id"] == event_id]
+    if ev.empty:
+        return None
+
+    actor = ev.loc[ev["actor"] == True]
+    if actor.empty:
+        return None
+
+    visible_area = actor.iloc[0].get("visible_area")
+    if not isinstance(visible_area, list) or len(visible_area) < 6 or (len(visible_area) % 2) != 0:
+        return None
+
+    pts = []
+    for i in range(0, len(visible_area), 2):
+        try:
+            pts.append((float(visible_area[i]), float(visible_area[i + 1])))
+        except Exception:
+            return None
+    if len(pts) < 3:
+        return None
+    return np.asarray(pts, dtype=float)
+
+
 def _save_or_show(fig: plt.Figure, out_path: Optional[str], show: bool) -> None:
     if out_path:
         out = Path(out_path)
@@ -82,7 +106,6 @@ def plot_pass_selection_surface(
         expanded_df: pd.DataFrame,
         event_id: str,
         *,
-        vis_mask: Optional[np.ndarray] = None,
         title: str = "",
         out_path: Optional[str] = None,
         show: bool = False,
@@ -99,6 +122,7 @@ def plot_pass_selection_surface(
     These probabilities are tiny across most cells, so "log" is usually best.
     """
     passer_xy, dest_xy, completed, atk_xy, dfn_xy = _extract_scene(expanded_df, event_id)
+    visible_area_pts = _extract_visible_area(expanded_df, event_id)
 
     pitch = _make_pitch()
     fig, ax = pitch.draw(figsize=(11, 7))
@@ -150,16 +174,9 @@ def plot_pass_selection_surface(
     cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
     cb.ax.tick_params(labelsize=9)
 
-    if vis_mask is not None:
-        vis_img = _to_img_yx(vis_mask)
-        ax.contour(
-            vis_img,
-            levels=[0.5],
-            colors="lime",
-            linewidths=2,
-            extent=pitch.extent,
-            origin="upper",
-        )
+    if visible_area_pts is not None:
+        closed = np.vstack([visible_area_pts, visible_area_pts[0]])
+        ax.plot(closed[:, 0], closed[:, 1], color="lime", linewidth=2, zorder=4)
 
     # players
     if atk_xy.size:
