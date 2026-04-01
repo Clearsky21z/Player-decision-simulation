@@ -17,7 +17,12 @@ from soccermap.context import DEFAULT_CONTEXT_DIM
 from soccermap.expand import build_expanded_dfs
 from soccermap.dataset import PassDataset
 from soccermap.model import SoccerMap, SoccerMapConfig, SoccerMapWithPlayerEmbed
-from soccermap.viz import _extract_scene, _to_img_yx, plot_pass_selection_surface
+from soccermap.viz import (
+    _extract_scene,
+    _extract_visible_area,
+    _to_img_yx,
+    plot_pass_selection_surface,
+)
 
 
 def main():
@@ -184,8 +189,8 @@ def plot_pass_selection_embed(
         expanded_df, sample.event_id
     )
 
-    # ---- Visibility mask (channel 13) ----
-    vis_mask = sample.channels[13].cpu().numpy()
+    # ---- Visible area polygon from raw StatsBomb 360 data ----
+    visible_area_pts = _extract_visible_area(expanded_df, sample.event_id)
 
     # ---- Plot ----
     pitch = Pitch(pitch_type="statsbomb", line_color="black", linewidth=1.2)
@@ -213,16 +218,9 @@ def plot_pass_selection_embed(
     )
     fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
 
-    # visibility mask boundary
-    vis_img = _to_img_yx(vis_mask)
-    ax.contour(
-        vis_img,
-        levels=[0.5],
-        colors="lime",
-        linewidths=2,
-        extent=pitch.extent,
-        origin="upper",
-    )
+    if visible_area_pts is not None:
+        closed = np.vstack([visible_area_pts, visible_area_pts[0]])
+        ax.plot(closed[:, 0], closed[:, 1], color="lime", linewidth=2, zorder=4)
 
     # players
     if atk_xy.size:
